@@ -1,0 +1,1434 @@
+<script>
+  (function () {
+    try {
+      const savedTheme = localStorage.getItem("medrik_theme") || "dark";
+
+      if (savedTheme === "light") {
+        document.documentElement.classList.add("light-mode");
+      } else {
+        document.documentElement.classList.remove("light-mode");
+      }
+    } catch (e) {}
+  })();
+</script>
+
+<style>
+  /* ===============================
+     GLOBAL LIGHT MODE FOR ALL PAGES
+     =============================== */
+
+  html.light-mode,
+  html.light-mode body{
+    color:#172033 !important;
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,122,0,0.12), transparent 18%),
+      radial-gradient(circle at 90% 88%, rgba(255,122,0,0.08), transparent 16%),
+      linear-gradient(135deg, #e8dfd2 0%, #f3eadf 48%, #d8cec1 100%) !important;
+  }
+
+  html.light-mode body:not(.login-page){
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,122,0,0.12), transparent 18%),
+      radial-gradient(circle at 90% 88%, rgba(255,122,0,0.08), transparent 16%),
+      linear-gradient(135deg, #e8dfd2 0%, #f3eadf 48%, #d8cec1 100%) !important;
+  }
+
+  html.light-mode .page,
+  html.light-mode .container,
+  html.light-mode .wrapper,
+  html.light-mode .main,
+  html.light-mode .content,
+  html.light-mode .panel,
+  html.light-mode .card,
+  html.light-mode .box,
+  html.light-mode .section,
+  html.light-mode .form-card,
+  html.light-mode .admin-card,
+  html.light-mode .chart-card,
+  html.light-mode .stat-card,
+  html.light-mode .table-wrap,
+  html.light-mode .table-card,
+  html.light-mode .topbar,
+  html.light-mode .navbar,
+  html.light-mode .sidebar,
+  html.light-mode .side-panel,
+  html.light-mode .filter-panel,
+  html.light-mode .report-card{
+    background:rgba(255,248,238,0.88) !important;
+    border-color:rgba(130,74,24,0.18) !important;
+    color:#172033 !important;
+  }
+
+  html.light-mode h1,
+  html.light-mode h2,
+  html.light-mode h3,
+  html.light-mode h4,
+  html.light-mode h5,
+  html.light-mode strong,
+  html.light-mode label,
+  html.light-mode th{
+    color:#172033 !important;
+  }
+
+  html.light-mode p,
+  html.light-mode span,
+  html.light-mode td,
+  html.light-mode small,
+  html.light-mode .muted,
+  html.light-mode .subtitle,
+  html.light-mode .help,
+  html.light-mode .empty,
+  html.light-mode .desc,
+  html.light-mode .description{
+    color:#5f6878 !important;
+  }
+
+  html.light-mode input,
+  html.light-mode textarea,
+  html.light-mode select{
+    background:#fff8ed !important;
+    color:#172033 !important;
+    border-color:rgba(130,74,24,0.24) !important;
+  }
+
+  html.light-mode input::placeholder,
+  html.light-mode textarea::placeholder{
+    color:#8a7b6b !important;
+  }
+
+  html.light-mode table{
+    background:#fff8ed !important;
+    color:#172033 !important;
+    border-color:rgba(130,74,24,0.14) !important;
+  }
+
+  html.light-mode thead,
+  html.light-mode th{
+    background:#efe2d1 !important;
+    color:#172033 !important;
+    border-color:rgba(130,74,24,0.14) !important;
+  }
+
+  html.light-mode td{
+    background:#fffaf3 !important;
+    color:#172033 !important;
+    border-color:rgba(130,74,24,0.10) !important;
+  }
+
+  html.light-mode tr:hover td{
+    background:rgba(255,122,0,0.08) !important;
+  }
+
+  html.light-mode a{
+    color:#9a4a00 !important;
+  }
+
+  html.light-mode .btn,
+  html.light-mode button,
+  html.light-mode .back-btn,
+  html.light-mode .btn-link,
+  html.light-mode .side-btn,
+  html.light-mode .status-save-btn,
+  html.light-mode .primary-btn{
+    border-color:rgba(130,74,24,0.22) !important;
+  }
+
+  html.light-mode .btn-primary,
+  html.light-mode .primary,
+  html.light-mode button[type="submit"]{
+    background:linear-gradient(135deg, #ff7a00 0%, #ff9a3d 100%) !important;
+    color:#ffffff !important;
+    border:none !important;
+  }
+
+  html.light-mode .action-menu{
+    background:#fff8ed !important;
+    border-color:rgba(130,74,24,0.18) !important;
+    box-shadow:0 12px 30px rgba(72,45,22,0.16) !important;
+  }
+
+  html.light-mode .action-menu a,
+  html.light-mode .dropdown-menu a{
+    background:rgba(130,74,24,0.05) !important;
+    border-color:rgba(130,74,24,0.10) !important;
+    color:#172033 !important;
+  }
+
+  html.light-mode .flash,
+  html.light-mode .alert,
+  html.light-mode .question-chart-item,
+  html.light-mode .log-item,
+  html.light-mode .feedback-item{
+    background:#fff8ed !important;
+    border-color:rgba(130,74,24,0.16) !important;
+    color:#172033 !important;
+  }
+
+  html.light-mode .modal-box,
+  html.light-mode .modal-content{
+    background:#fff8ed !important;
+    color:#172033 !important;
+    border-color:rgba(130,74,24,0.22) !important;
+  }
+
+  /* ===============================
+     LOGIN PAGE BACKGROUND ONLY
+     فقط مخصوص لاگین
+     =============================== */
+
+  body.login-page{
+    position:relative !important;
+    min-height:100vh !important;
+    overflow:hidden !important;
+  }
+
+  body.login-page::before{
+    content:"" !important;
+    position:fixed !important;
+    inset:0 !important;
+    background:url("/static/images/login-bg.jpg") center center / cover no-repeat !important;
+    opacity:1 !important;
+    filter:blur(0.4px) brightness(0.78) saturate(1.06) contrast(1.04) !important;
+    z-index:0 !important;
+    pointer-events:none !important;
+  }
+
+  body.login-page::after{
+    content:"" !important;
+    position:fixed !important;
+    inset:0 !important;
+    background:rgba(3,6,12,0.20) !important;
+    z-index:1 !important;
+    pointer-events:none !important;
+  }
+
+  body.login-page > *{
+    position:relative !important;
+    z-index:2 !important;
+  }
+
+  html.light-mode body.login-page::before{
+    filter:blur(0.4px) brightness(0.96) saturate(0.98) contrast(1.00) !important;
+  }
+
+  html.light-mode body.login-page::after{
+    background:rgba(245,238,228,0.18) !important;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    try {
+      const savedTheme = localStorage.getItem("medrik_theme") || "dark";
+      const isLight = savedTheme === "light";
+
+      document.documentElement.classList.toggle("light-mode", isLight);
+      document.body.classList.toggle("light-mode", isLight);
+    } catch (e) {}
+  });
+</script>
+<style>
+  /* Login Background Switch: Dark / Light */
+
+  body.login-page::before{
+    background:url("/static/images/login-bg.jpg") center center / cover no-repeat !important;
+  }
+
+  html.light-mode body.login-page::before{
+    background:url("/static/images/login-bg-light.png") center center / cover no-repeat !important;
+    filter:blur(0.35px) brightness(0.98) saturate(0.98) contrast(1.00) !important;
+    opacity:1 !important;
+  }
+
+  body.login-page::after{
+    background:rgba(3,6,12,0.18) !important;
+  }
+
+  html.light-mode body.login-page::after{
+    background:rgba(245,238,228,0.10) !important;
+  }
+</style>
+<style>
+  /* =====================================================
+     FINAL SMALL GLASS LOGIN BOX
+     ===================================================== */
+
+  body.login-page{
+    width:100vw !important;
+    height:100vh !important;
+    min-height:100vh !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+    position:relative !important;
+    background:#07090f !important;
+  }
+
+  body.login-page::before{
+    content:"" !important;
+    position:fixed !important;
+    inset:0 !important;
+    background:url("/static/images/login-bg.jpg") center center / cover no-repeat !important;
+    opacity:1 !important;
+    filter:blur(0.35px) brightness(0.80) saturate(1.06) contrast(1.04) !important;
+    z-index:0 !important;
+    pointer-events:none !important;
+  }
+
+  html.light-mode body.login-page::before{
+    background:url("/static/images/login-bg-light.png") center center / cover no-repeat !important;
+    filter:blur(0.25px) brightness(0.98) saturate(0.98) contrast(1.00) !important;
+  }
+
+  body.login-page::after{
+    content:"" !important;
+    position:fixed !important;
+    inset:0 !important;
+    background:rgba(3,6,12,0.16) !important;
+    z-index:1 !important;
+    pointer-events:none !important;
+  }
+
+  html.light-mode body.login-page::after{
+    background:rgba(245,238,228,0.10) !important;
+  }
+
+  body.login-page > *{
+    position:relative !important;
+    z-index:2 !important;
+  }
+
+  body.login-page .login-wrapper,
+  body.login-page .login-container,
+  body.login-page .auth-wrapper,
+  body.login-page .auth-container,
+  body.login-page .page,
+  body.login-page .container,
+  body.login-page main{
+    width:100vw !important;
+    height:100vh !important;
+    min-height:100vh !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    overflow:hidden !important;
+  }
+
+  body.login-page .login-card,
+  body.login-page .auth-card,
+  body.login-page .login-box,
+  body.login-page .auth-box{
+    width:auto !important;
+    max-width:none !important;
+    min-width:0 !important;
+    height:auto !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    display:block !important;
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    overflow:visible !important;
+  }
+
+  body.login-page .intro-panel{
+    display:none !important;
+    width:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    height:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    opacity:0 !important;
+    overflow:hidden !important;
+    pointer-events:none !important;
+  }
+
+  body.login-page .login-glass-box{
+    width:360px !important;
+    max-width:360px !important;
+    min-width:360px !important;
+    height:auto !important;
+    min-height:auto !important;
+    margin:0 7vw 0 0 !important;
+    padding:28px 28px !important;
+    border-radius:24px !important;
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10,15,24,0.38) 0%,
+        rgba(7,11,18,0.28) 100%
+      ) !important;
+
+    border:1px solid rgba(255,255,255,0.24) !important;
+
+    box-shadow:
+      0 24px 70px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.15) !important;
+
+    backdrop-filter:blur(16px) saturate(1.12) !important;
+    -webkit-backdrop-filter:blur(16px) saturate(1.12) !important;
+
+    color:#f4f6fa !important;
+    overflow:hidden !important;
+  }
+
+  body.login-page .login-glass-box h1,
+  body.login-page .login-glass-box h2,
+  body.login-page .login-glass-box h3{
+    color:#f8f0df !important;
+    font-size:20px !important;
+    font-weight:900 !important;
+    line-height:1.7 !important;
+    text-align:center !important;
+    margin:0 0 6px !important;
+    text-shadow:0 2px 12px rgba(0,0,0,0.38) !important;
+  }
+
+  body.login-page .login-glass-box p{
+    color:rgba(248,240,223,0.82) !important;
+    font-size:12px !important;
+    line-height:1.8 !important;
+    text-align:center !important;
+    margin:0 0 20px !important;
+    text-shadow:0 2px 10px rgba(0,0,0,0.30) !important;
+  }
+
+  body.login-page .login-glass-box label,
+  body.login-page .login-glass-box span,
+  body.login-page .login-glass-box small,
+  body.login-page .login-glass-box a{
+    color:rgba(248,240,223,0.86) !important;
+    font-size:11px !important;
+  }
+
+  body.login-page .login-glass-box form{
+    width:100% !important;
+  }
+
+  body.login-page .login-glass-box input{
+    width:100% !important;
+    height:44px !important;
+    border-radius:12px !important;
+    background:rgba(5,9,15,0.28) !important;
+    border:1px solid rgba(255,255,255,0.24) !important;
+    color:#ffffff !important;
+    font-size:13px !important;
+    padding:0 13px !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  }
+
+  body.login-page .login-glass-box input::placeholder{
+    color:rgba(255,255,255,0.56) !important;
+  }
+
+  body.login-page .login-glass-box input:focus{
+    border-color:rgba(224,189,125,0.88) !important;
+    box-shadow:
+      0 0 0 3px rgba(224,189,125,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.08) !important;
+    outline:none !important;
+  }
+
+  body.login-page .login-glass-box button[type="submit"],
+  body.login-page .login-glass-box .login-btn,
+  body.login-page .login-glass-box .submit-btn{
+    width:100% !important;
+    height:44px !important;
+    border-radius:12px !important;
+    background:linear-gradient(135deg, rgba(200,156,93,0.96) 0%, rgba(224,189,125,0.96) 100%) !important;
+    color:#111827 !important;
+    border:none !important;
+    font-size:14px !important;
+    font-weight:900 !important;
+    box-shadow:0 16px 34px rgba(200,156,93,0.22) !important;
+    cursor:pointer !important;
+  }
+
+  html.light-mode body.login-page .login-glass-box{
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,248,238,0.42) 0%,
+        rgba(239,229,216,0.28) 100%
+      ) !important;
+
+    border:1px solid rgba(120,90,50,0.24) !important;
+
+    box-shadow:
+      0 24px 70px rgba(70,45,20,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.50) !important;
+
+    color:#172033 !important;
+  }
+
+  html.light-mode body.login-page .login-glass-box h1,
+  html.light-mode body.login-page .login-glass-box h2,
+  html.light-mode body.login-page .login-glass-box h3{
+    color:#2c241b !important;
+    text-shadow:none !important;
+  }
+
+  html.light-mode body.login-page .login-glass-box p,
+  html.light-mode body.login-page .login-glass-box label,
+  html.light-mode body.login-page .login-glass-box span,
+  html.light-mode body.login-page .login-glass-box small,
+  html.light-mode body.login-page .login-glass-box a{
+    color:#4f4338 !important;
+    text-shadow:none !important;
+  }
+
+  html.light-mode body.login-page .login-glass-box input{
+    background:rgba(255,251,246,0.42) !important;
+    border:1px solid rgba(130,100,62,0.28) !important;
+    color:#111827 !important;
+  }
+
+  @media (max-width:900px){
+    body.login-page .login-wrapper,
+    body.login-page .login-container,
+    body.login-page .auth-wrapper,
+    body.login-page .auth-container,
+    body.login-page .page,
+    body.login-page .container,
+    body.login-page main{
+      justify-content:center !important;
+      padding:18px !important;
+    }
+
+    body.login-page .login-glass-box{
+      width:100% !important;
+      max-width:360px !important;
+      min-width:0 !important;
+      margin:0 !important;
+      padding:28px 22px !important;
+      border-radius:22px !important;
+    }
+  }
+</style>
+<style>
+  body.login-page section.form-panel.login-glass-box{
+    width:360px !important;
+    max-width:360px !important;
+    min-width:360px !important;
+    height:auto !important;
+    min-height:auto !important;
+    margin:0 7vw 0 0 !important;
+    padding:28px 28px !important;
+    border-radius:24px !important;
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10,15,24,0.38) 0%,
+        rgba(7,11,18,0.28) 100%
+      ) !important;
+
+    border:1px solid rgba(255,255,255,0.24) !important;
+
+    box-shadow:
+      0 24px 70px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.15) !important;
+
+    backdrop-filter:blur(16px) saturate(1.12) !important;
+    -webkit-backdrop-filter:blur(16px) saturate(1.12) !important;
+
+    color:#f4f6fa !important;
+    overflow:hidden !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box h2{
+    color:#f8f0df !important;
+    font-size:20px !important;
+    font-weight:900 !important;
+    text-align:center !important;
+    margin:0 0 6px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box p{
+    color:rgba(248,240,223,0.82) !important;
+    font-size:12px !important;
+    text-align:center !important;
+    margin:0 0 20px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input{
+    height:44px !important;
+    border-radius:12px !important;
+    background:rgba(5,9,15,0.28) !important;
+    border:1px solid rgba(255,255,255,0.24) !important;
+    color:#ffffff !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    height:44px !important;
+    border-radius:12px !important;
+    background:linear-gradient(135deg, rgba(200,156,93,0.96) 0%, rgba(224,189,125,0.96) 100%) !important;
+    color:#111827 !important;
+    font-weight:900 !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box{
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,248,238,0.42) 0%,
+        rgba(239,229,216,0.28) 100%
+      ) !important;
+
+    border:1px solid rgba(120,90,50,0.24) !important;
+
+    box-shadow:
+      0 24px 70px rgba(70,45,20,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.50) !important;
+
+    color:#172033 !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box h2{
+    color:#2c241b !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box p,
+  html.light-mode body.login-page section.form-panel.login-glass-box label,
+  html.light-mode body.login-page section.form-panel.login-glass-box span,
+  html.light-mode body.login-page section.form-panel.login-glass-box small,
+  html.light-mode body.login-page section.form-panel.login-glass-box a{
+    color:#4f4338 !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box input{
+    background:rgba(255,251,246,0.42) !important;
+    border:1px solid rgba(130,100,62,0.28) !important;
+    color:#111827 !important;
+  }
+</style>
+<style>
+  /* ===== حذف پنل مات بزرگ پشت لاگین ===== */
+
+  body.login-page .login-wrapper,
+  body.login-page .login-container,
+  body.login-page .login-shell,
+  body.login-page .login-layout,
+  body.login-page .auth-wrapper,
+  body.login-page .auth-container,
+  body.login-page .auth-shell,
+  body.login-page .auth-card,
+  body.login-page .login-card,
+  body.login-page .page,
+  body.login-page .container,
+  body.login-page main,
+  body.login-page .content,
+  body.login-page .content-panel,
+  body.login-page .hero-panel,
+  body.login-page .visual-panel,
+  body.login-page .left-panel,
+  body.login-page .right-panel,
+  body.login-page .intro-panel,
+  body.login-page .brand-panel,
+  body.login-page .visual-box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* ===== فقط باکس اصلی لاگین باقی بماند ===== */
+
+  body.login-page section.form-panel.login-glass-box{
+    width: 360px !important;
+    max-width: 360px !important;
+    min-width: 360px !important;
+    margin: 0 6vw 0 0 !important;
+    padding: 28px !important;
+    border-radius: 24px !important;
+    position: relative !important;
+    z-index: 5 !important;
+    overflow: hidden !important;
+
+    background: linear-gradient(
+      180deg,
+      rgba(8, 14, 24, 0.42) 0%,
+      rgba(6, 10, 18, 0.26) 100%
+    ) !important;
+
+    border: 1px solid rgba(255,255,255,0.18) !important;
+
+    box-shadow:
+      0 16px 40px rgba(0,0,0,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.08) !important;
+
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title h2{
+    color: #f8f0df !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    margin: 0 0 8px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title p{
+    color: rgba(248,240,223,0.85) !important;
+    font-size: 12px !important;
+    line-height: 1.9 !important;
+    text-align: center !important;
+    margin: 0 0 18px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input{
+    background: rgba(255,248,210,0.96) !important;
+    color: #111 !important;
+    border: none !important;
+    border-radius: 14px !important;
+    height: 44px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    height: 46px !important;
+    border-radius: 14px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #cfa468 0%, #d9b273 100%) !important;
+    color: #111 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 10px 24px rgba(201,156,90,0.20) !important;
+  }
+
+  /* ===== حالت روشن ===== */
+
+  html.light-mode body.login-page section.form-panel.login-glass-box{
+    background: linear-gradient(
+      180deg,
+      rgba(255,250,244,0.38) 0%,
+      rgba(243,232,219,0.24) 100%
+    ) !important;
+    border: 1px solid rgba(120,90,50,0.16) !important;
+    box-shadow:
+      0 16px 36px rgba(70,45,20,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.30) !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box .form-title h2{
+    color: #2c241b !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box .form-title p,
+  html.light-mode body.login-page section.form-panel.login-glass-box label,
+  html.light-mode body.login-page section.form-panel.login-glass-box span,
+  html.light-mode body.login-page section.form-panel.login-glass-box a,
+  html.light-mode body.login-page section.form-panel.login-glass-box small{
+    color: #5c4f43 !important;
+  }
+
+  @media (max-width: 900px){
+    body.login-page section.form-panel.login-glass-box{
+      width: 100% !important;
+      max-width: 360px !important;
+      min-width: 0 !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<style>
+  /* ===== Final Login Glass Box Color Tuning ===== */
+
+  body.login-page section.form-panel.login-glass-box{
+    background:
+      linear-gradient(
+        180deg,
+        rgba(10, 16, 26, 0.58) 0%,
+        rgba(6, 10, 18, 0.44) 100%
+      ) !important;
+
+    border: 1px solid rgba(232, 201, 143, 0.26) !important;
+
+    box-shadow:
+      0 18px 46px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.12) !important;
+
+    backdrop-filter: blur(12px) saturate(1.10) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.10) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title h2{
+    color: #fff3dc !important;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.55) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title p{
+    color: rgba(255,245,225,0.88) !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.45) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box label{
+    color: #fff1d4 !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.45) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box span,
+  body.login-page section.form-panel.login-glass-box small{
+    color: rgba(255,244,225,0.82) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box a{
+    color: #f4c879 !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.40) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input{
+    background: rgba(255, 249, 207, 0.96) !important;
+    color: #111827 !important;
+    border: 1px solid rgba(232, 201, 143, 0.34) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.65),
+      0 8px 18px rgba(0,0,0,0.12) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input::placeholder{
+    color: rgba(40,40,40,0.56) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input:focus{
+    border-color: rgba(244, 200, 121, 0.88) !important;
+    box-shadow:
+      0 0 0 3px rgba(244, 200, 121, 0.18),
+      inset 0 1px 0 rgba(255,255,255,0.70) !important;
+    outline: none !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    background:
+      linear-gradient(135deg, #c7964d 0%, #e4bf78 52%, #cfa05e 100%) !important;
+    color: #111827 !important;
+    font-weight: 900 !important;
+    box-shadow:
+      0 14px 30px rgba(201,156,90,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.35) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]:hover{
+    filter: brightness(1.05) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ===== Light Mode Login Box ===== */
+
+  html.light-mode body.login-page section.form-panel.login-glass-box{
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 250, 242, 0.62) 0%,
+        rgba(239, 226, 207, 0.46) 100%
+      ) !important;
+
+    border: 1px solid rgba(132, 88, 38, 0.28) !important;
+
+    box-shadow:
+      0 18px 46px rgba(78, 49, 21, 0.14),
+      inset 0 1px 0 rgba(255,255,255,0.58) !important;
+
+    backdrop-filter: blur(12px) saturate(1.05) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.05) !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box .form-title h2{
+    color: #241a12 !important;
+    text-shadow: none !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box .form-title p{
+    color: #4d4035 !important;
+    text-shadow: none !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box label{
+    color: #2d241c !important;
+    font-weight: 800 !important;
+    text-shadow: none !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box span,
+  html.light-mode body.login-page section.form-panel.login-glass-box small{
+    color: #4f4338 !important;
+    text-shadow: none !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box a{
+    color: #8a4f09 !important;
+    font-weight: 800 !important;
+    text-shadow: none !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box input{
+    background: rgba(255, 252, 244, 0.88) !important;
+    color: #111827 !important;
+    border: 1px solid rgba(132, 88, 38, 0.26) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      0 8px 18px rgba(78,49,21,0.08) !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box input::placeholder{
+    color: rgba(70,60,50,0.58) !important;
+  }
+
+  html.light-mode body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    background:
+      linear-gradient(135deg, #bd8541 0%, #ddb66d 52%, #c89550 100%) !important;
+    color: #111827 !important;
+    box-shadow:
+      0 14px 30px rgba(132,88,38,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.40) !important;
+  }
+</style>
+<style>
+  /* Move login box more to the right */
+  body.login-page section.form-panel.login-glass-box{
+    margin: 0 3vw 0 0 !important;
+  }
+
+  /* Make submit button more orange */
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    background:
+      linear-gradient(135deg, #ff7a00 0%, #ff9a3d 55%, #ff6b00 100%) !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    box-shadow:
+      0 14px 32px rgba(255,122,0,0.34),
+      inset 0 1px 0 rgba(255,255,255,0.28) !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]:hover{
+    background:
+      linear-gradient(135deg, #ff8a1f 0%, #ffa24d 55%, #ff7200 100%) !important;
+    box-shadow:
+      0 18px 40px rgba(255,122,0,0.42),
+      inset 0 1px 0 rgba(255,255,255,0.30) !important;
+  }
+
+  /* Light mode submit button */
+  html.light-mode body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    background:
+      linear-gradient(135deg, #ff7a00 0%, #ff9a3d 55%, #ff6b00 100%) !important;
+    color: #ffffff !important;
+    box-shadow:
+      0 14px 30px rgba(255,122,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.32) !important;
+  }
+</style>
+<style>
+  /* Final login box size and balanced position */
+  body.login-page section.form-panel.login-glass-box{
+    width: 390px !important;
+    max-width: 390px !important;
+    min-width: 390px !important;
+
+    /* قبلاً حدود 3vw بود؛ این کمی می‌آوردش سمت چپ */
+margin: 0 4.5vw 0 0 !important;
+    padding: 32px 32px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input{
+    height: 46px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    height: 46px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title h2{
+    font-size: 21px !important;
+  }
+
+  @media (max-width:900px){
+    body.login-page section.form-panel.login-glass-box{
+      width: 100% !important;
+      max-width: 390px !important;
+      min-width: 0 !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<style>
+  /* Bigger login box */
+  body.login-page section.form-panel.login-glass-box{
+    width: 430px !important;
+    max-width: 430px !important;
+    min-width: 430px !important;
+    padding: 38px 38px !important;
+    margin: 0 5vw 0 0 !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title h2{
+    font-size: 23px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box .form-title p{
+    font-size: 13px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box input{
+    height: 50px !important;
+    font-size: 14px !important;
+  }
+
+  body.login-page section.form-panel.login-glass-box button[type="submit"]{
+    height: 50px !important;
+    font-size: 15px !important;
+  }
+
+  @media (max-width:900px){
+    body.login-page section.form-panel.login-glass-box{
+      width: 100% !important;
+      max-width: 430px !important;
+      min-width: 0 !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<style>
+  /* Move login box closer to the right corner */
+  body.login-page section.form-panel.login-glass-box{
+    margin: 0 1.5vw 0 0 !important;
+  }
+
+  @media (max-width:900px){
+    body.login-page section.form-panel.login-glass-box{
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<style>
+  /* =========================================================
+     STEP 1 - MAIN CHAT PAGE PRODUCT UI UPGRADE
+     فقط برای صفحه اصلی چت، نه صفحه لاگین
+     ========================================================= */
+
+  body:not(.login-page){
+    background:
+      radial-gradient(circle at 8% 10%, rgba(255,122,0,0.10), transparent 22%),
+      radial-gradient(circle at 92% 88%, rgba(255,122,0,0.06), transparent 18%),
+      linear-gradient(135deg, #07090d 0%, #0d1017 45%, #090b10 100%) !important;
+    color: #f4f6fa !important;
+  }
+
+  body:not(.login-page) .app-shell{
+    background: transparent !important;
+  }
+
+  /* ===== Sidebar ===== */
+
+  body:not(.login-page) .sidebar{
+    background:
+      linear-gradient(180deg, rgba(255,122,0,0.10), transparent 26%),
+      linear-gradient(180deg, rgba(13,16,22,0.96), rgba(9,11,16,0.98)) !important;
+    border-left: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: -12px 0 34px rgba(0,0,0,0.18) !important;
+  }
+
+  body:not(.login-page) .brand-mark{
+    background: linear-gradient(135deg, #ff7a00 0%, #ff9a3d 100%) !important;
+    box-shadow: 0 12px 28px rgba(255,122,0,0.26) !important;
+  }
+
+  body:not(.login-page) .brand-text h1,
+  body:not(.login-page) .topbar-left h2{
+    color: #fff6ea !important;
+  }
+
+  body:not(.login-page) .brand-text p,
+  body:not(.login-page) .topbar-left p,
+  body:not(.login-page) .side-card p,
+  body:not(.login-page) .mini-note,
+  body:not(.login-page) .subnote{
+    color: rgba(224,230,240,0.68) !important;
+  }
+
+  body:not(.login-page) .side-card,
+  body:not(.login-page) .topic-item{
+    background: rgba(255,255,255,0.035) !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.14) !important;
+  }
+
+  body:not(.login-page) .topic-icon{
+    background: rgba(255,122,0,0.12) !important;
+    border-color: rgba(255,122,0,0.22) !important;
+    color: #ffb067 !important;
+  }
+
+  /* ===== Main area ===== */
+
+  body:not(.login-page) .main{
+    background:
+      linear-gradient(180deg, rgba(12,15,21,0.96), rgba(13,17,24,0.98)) !important;
+  }
+
+  body:not(.login-page) .topbar{
+    height: 74px !important;
+    min-height: 74px !important;
+    background: rgba(255,255,255,0.025) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  body:not(.login-page) .status-badge{
+    background: rgba(255,255,255,0.045) !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    color: #eef2f8 !important;
+  }
+
+  body:not(.login-page) .theme-toggle-btn{
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.16) !important;
+  }
+
+  /* ===== Question toolbar ===== */
+
+  body:not(.login-page) .question-toolbar{
+    margin: 14px 18px 10px !important;
+    padding: 12px 14px !important;
+    border-radius: 18px !important;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.025)) !important;
+    border: 1px solid rgba(255,255,255,0.075) !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.16) !important;
+  }
+
+  body:not(.login-page) .question-toolbar-title{
+    color: #fff3e5 !important;
+    font-size: 13px !important;
+  }
+
+  body:not(.login-page) .question-toolbar-note{
+    color: rgba(224,230,240,0.60) !important;
+  }
+
+  body:not(.login-page) .group-tab{
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    border-radius: 11px !important;
+    background: rgba(255,255,255,0.045) !important;
+    border: 1px solid rgba(255,255,255,0.075) !important;
+    color: #e9edf5 !important;
+    font-weight: 700 !important;
+  }
+
+  body:not(.login-page) .group-tab:hover{
+    background: rgba(255,122,0,0.13) !important;
+    border-color: rgba(255,122,0,0.28) !important;
+    color: #fff !important;
+  }
+
+  body:not(.login-page) .group-tab.active{
+    background: linear-gradient(135deg, rgba(255,122,0,0.28), rgba(255,122,0,0.12)) !important;
+    border-color: rgba(255,122,0,0.36) !important;
+    color: #fff4e8 !important;
+    box-shadow: 0 8px 20px rgba(255,122,0,0.10) !important;
+  }
+
+  body:not(.login-page) .question-chip{
+    min-height: 34px !important;
+    border-radius: 12px !important;
+    background: rgba(255,122,0,0.075) !important;
+    border: 1px solid rgba(255,122,0,0.18) !important;
+    color: #ffd8ad !important;
+    font-weight: 700 !important;
+  }
+
+  body:not(.login-page) .question-chip:hover{
+    background: rgba(255,122,0,0.16) !important;
+    border-color: rgba(255,122,0,0.30) !important;
+    color: #fff7ed !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ===== Messages ===== */
+
+  body:not(.login-page) .messages{
+    padding: 8px 20px 12px !important;
+  }
+
+  body:not(.login-page) .message{
+    margin-bottom: 14px !important;
+  }
+
+  body:not(.login-page) .bubble{
+    font-size: 13px !important;
+    line-height: 2 !important;
+    border-radius: 19px !important;
+    padding: 13px 15px !important;
+  }
+
+  body:not(.login-page) .message.user .bubble{
+    background:
+      linear-gradient(135deg, rgba(36,42,55,0.96), rgba(24,29,40,0.96)) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22) !important;
+  }
+
+  body:not(.login-page) .message.bot .bubble{
+    background:
+      linear-gradient(180deg, rgba(255,122,0,0.105), rgba(255,255,255,0.035)) !important;
+    border: 1px solid rgba(255,122,0,0.20) !important;
+    color: #fffaf4 !important;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.18) !important;
+  }
+
+  body:not(.login-page) .category{
+    margin-top: 10px !important;
+    padding: 4px 9px !important;
+    background: rgba(255,122,0,0.14) !important;
+    border: 1px solid rgba(255,122,0,0.24) !important;
+    color: #ffd3a1 !important;
+    font-weight: 800 !important;
+  }
+
+  /* ===== Feedback buttons - اگر در صفحه وجود داشته باشند ===== */
+
+  body:not(.login-page) .feedback-row,
+  body:not(.login-page) .answer-feedback,
+  body:not(.login-page) .feedback-actions{
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  body:not(.login-page) .feedback-row button,
+  body:not(.login-page) .answer-feedback button,
+  body:not(.login-page) .feedback-actions button,
+  body:not(.login-page) .feedback-btn,
+  body:not(.login-page) .useful-btn,
+  body:not(.login-page) .not-useful-btn{
+    min-height: 30px !important;
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: rgba(255,255,255,0.055) !important;
+    color: #edf2f8 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+  }
+
+  body:not(.login-page) .feedback-row button:hover,
+  body:not(.login-page) .answer-feedback button:hover,
+  body:not(.login-page) .feedback-actions button:hover,
+  body:not(.login-page) .feedback-btn:hover,
+  body:not(.login-page) .useful-btn:hover,
+  body:not(.login-page) .not-useful-btn:hover{
+    background: rgba(255,122,0,0.14) !important;
+    border-color: rgba(255,122,0,0.28) !important;
+    color: #fff !important;
+  }
+
+  /* ===== Typing ===== */
+
+  body:not(.login-page) .typing{
+    margin: 0 20px 8px !important;
+    padding: 8px 12px !important;
+    width: fit-content !important;
+    max-width: 80% !important;
+    border-radius: 999px !important;
+    background: rgba(255,122,0,0.09) !important;
+    border: 1px solid rgba(255,122,0,0.20) !important;
+    color: #ffd6aa !important;
+    font-weight: 800 !important;
+  }
+
+  /* ===== Input ===== */
+
+  body:not(.login-page) .input-zone{
+    padding: 12px 18px 16px !important;
+    background:
+      linear-gradient(180deg, rgba(13,17,24,0.72), rgba(9,11,16,0.94)) !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+  }
+
+  body:not(.login-page) .input-box{
+    min-height: 60px !important;
+    border-radius: 19px !important;
+    background: rgba(255,255,255,0.045) !important;
+    border: 1px solid rgba(255,255,255,0.095) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.20) !important;
+  }
+
+  body:not(.login-page) .input-box input{
+    height: 44px !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+  }
+
+  body:not(.login-page) .input-box input::placeholder{
+    color: rgba(224,230,240,0.48) !important;
+  }
+
+  body:not(.login-page) .send-btn{
+    min-width: 96px !important;
+    height: 44px !important;
+    border-radius: 13px !important;
+    background: linear-gradient(135deg, #ff7a00 0%, #ff9a3d 55%, #ff6b00 100%) !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    box-shadow: 0 12px 28px rgba(255,122,0,0.28) !important;
+  }
+
+  body:not(.login-page) .send-btn:hover{
+    transform: translateY(-1px) !important;
+    box-shadow: 0 16px 34px rgba(255,122,0,0.36) !important;
+  }
+
+  /* =========================================================
+     LIGHT MODE FOR MAIN CHAT PAGE
+     ========================================================= */
+
+  html.light-mode body:not(.login-page){
+    background:
+      radial-gradient(circle at 8% 10%, rgba(255,122,0,0.12), transparent 23%),
+      radial-gradient(circle at 92% 88%, rgba(180,120,48,0.10), transparent 18%),
+      linear-gradient(135deg, #f7efe5 0%, #fff9f1 48%, #f2e4d4 100%) !important;
+    color: #1f2933 !important;
+  }
+
+  html.light-mode body:not(.login-page) .main{
+    background:
+      linear-gradient(180deg, rgba(255,250,243,0.92), rgba(247,238,226,0.94)) !important;
+  }
+
+  html.light-mode body:not(.login-page) .sidebar{
+    background:
+      linear-gradient(180deg, rgba(255,122,0,0.12), transparent 28%),
+      linear-gradient(180deg, rgba(255,248,238,0.94), rgba(242,229,212,0.96)) !important;
+    border-left: 1px solid rgba(120,82,35,0.14) !important;
+    box-shadow: -12px 0 34px rgba(100,70,30,0.08) !important;
+  }
+
+  html.light-mode body:not(.login-page) .topbar{
+    background: rgba(255,248,238,0.72) !important;
+    border-bottom: 1px solid rgba(120,82,35,0.14) !important;
+  }
+
+  html.light-mode body:not(.login-page) .brand-text h1,
+  html.light-mode body:not(.login-page) .topbar-left h2{
+    color: #241a12 !important;
+  }
+
+  html.light-mode body:not(.login-page) .brand-text p,
+  html.light-mode body:not(.login-page) .topbar-left p,
+  html.light-mode body:not(.login-page) .side-card p,
+  html.light-mode body:not(.login-page) .mini-note,
+  html.light-mode body:not(.login-page) .subnote{
+    color: #6a5a48 !important;
+  }
+
+  html.light-mode body:not(.login-page) .side-card,
+  html.light-mode body:not(.login-page) .topic-item,
+  html.light-mode body:not(.login-page) .question-toolbar,
+  html.light-mode body:not(.login-page) .input-box,
+  html.light-mode body:not(.login-page) .status-badge,
+  html.light-mode body:not(.login-page) .theme-toggle-btn{
+    background: rgba(255,255,255,0.62) !important;
+    border-color: rgba(120,82,35,0.14) !important;
+    color: #2b241d !important;
+    box-shadow: 0 12px 28px rgba(100,70,30,0.08) !important;
+  }
+
+  html.light-mode body:not(.login-page) .group-tab{
+    background: rgba(255,255,255,0.58) !important;
+    border-color: rgba(120,82,35,0.13) !important;
+    color: #3c3228 !important;
+  }
+
+  html.light-mode body:not(.login-page) .group-tab.active{
+    background: linear-gradient(135deg, rgba(255,122,0,0.24), rgba(255,175,82,0.18)) !important;
+    border-color: rgba(255,122,0,0.32) !important;
+    color: #2d1f14 !important;
+  }
+
+  html.light-mode body:not(.login-page) .question-chip{
+    background: rgba(255,122,0,0.10) !important;
+    border-color: rgba(255,122,0,0.20) !important;
+    color: #7a3f00 !important;
+  }
+
+  html.light-mode body:not(.login-page) .message.user .bubble{
+    background: linear-gradient(135deg, #2b3443, #1f2733) !important;
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.08) !important;
+  }
+
+  html.light-mode body:not(.login-page) .message.bot .bubble{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,244,230,0.72)) !important;
+    border: 1px solid rgba(185,119,40,0.18) !important;
+    color: #2b241d !important;
+    box-shadow: 0 12px 26px rgba(100,70,30,0.08) !important;
+  }
+
+  html.light-mode body:not(.login-page) .category{
+    background: rgba(255,122,0,0.12) !important;
+    border-color: rgba(255,122,0,0.22) !important;
+    color: #8a4700 !important;
+  }
+
+  html.light-mode body:not(.login-page) .typing{
+    background: rgba(255,122,0,0.12) !important;
+    border-color: rgba(255,122,0,0.22) !important;
+    color: #8a4700 !important;
+  }
+
+  html.light-mode body:not(.login-page) .input-zone{
+    background:
+      linear-gradient(180deg, rgba(255,250,243,0.72), rgba(244,232,216,0.95)) !important;
+    border-top: 1px solid rgba(120,82,35,0.13) !important;
+  }
+
+  html.light-mode body:not(.login-page) .input-box input{
+    color: #1f2933 !important;
+  }
+
+  html.light-mode body:not(.login-page) .input-box input::placeholder{
+    color: rgba(70,60,50,0.55) !important;
+  }
+
+  html.light-mode body:not(.login-page) .feedback-row button,
+  html.light-mode body:not(.login-page) .answer-feedback button,
+  html.light-mode body:not(.login-page) .feedback-actions button,
+  html.light-mode body:not(.login-page) .feedback-btn,
+  html.light-mode body:not(.login-page) .useful-btn,
+  html.light-mode body:not(.login-page) .not-useful-btn{
+    background: rgba(255,255,255,0.65) !important;
+    border-color: rgba(120,82,35,0.14) !important;
+    color: #3c3228 !important;
+  }
+
+  html.light-mode body:not(.login-page) .feedback-row button:hover,
+  html.light-mode body:not(.login-page) .answer-feedback button:hover,
+  html.light-mode body:not(.login-page) .feedback-actions button:hover,
+  html.light-mode body:not(.login-page) .feedback-btn:hover,
+  html.light-mode body:not(.login-page) .useful-btn:hover,
+  html.light-mode body:not(.login-page) .not-useful-btn:hover{
+    background: rgba(255,122,0,0.14) !important;
+    border-color: rgba(255,122,0,0.28) !important;
+    color: #7a3f00 !important;
+  }
+</style>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پایگاه دانش پشتیبانی | مدریک</title>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#11161f;
+      --card2:#151b26;
+      --border:rgba(255,255,255,0.08);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --green:#1fc25b;
+      --red:#ff6b6b;
+      --yellow:#ffd166;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,122,0,0.10), transparent 18%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 50%, #090b10 100%);
+      color:var(--text);
+      padding:22px;
+    }
+
+    .page{
+      width:100%;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.5;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.9;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-link,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger{
+      border:none;
+      border-radius:10px;
+      min-height:34px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      white-space:nowrap;
+    }
+
+    .btn-link,
+    .btn-primary{
+      background:linear-gradient(135deg, var(--orange), var(--orange2));
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.10);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.25);
+      color:#ffd0d0;
+    }
+
+    .flash-wrap{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .flash{
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.8;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.04);
+    }
+
+    .flash.success{
+      color:#bfffd2;
+      border-color:rgba(31,194,91,0.24);
+      background:rgba(31,194,91,0.08);
+    }
+
+    .flash.error{
+      color:#ffd0d0;
+      border-color:rgba(255,107,107,0.24);
+      background:rgba(255,107,107,0.08);
+    }
+
+    .section{
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+    }
+
+    .section h2{
+      margin:0 0 12px;
+      font-size:17px;
+      line-height:1.6;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    input,
+    textarea,
+    select{
+      width:100%;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:#10151e;
+      color:var(--text);
+      font-size:12px;
+      line-height:1.8;
+      padding:9px 10px;
+      outline:none;
+      font-family:Tahoma, Arial, sans-serif;
+    }
+
+    textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    .help{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+    }
+
+    .faq-list{
+      display:grid;
+      gap:12px;
+    }
+
+    details{
+      background:#10151e;
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    summary{
+      cursor:pointer;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.9;
+      color:#fff;
+    }
+
+    .meta{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,0.10);
+    }
+
+    .active{
+      color:#bfffd2;
+      background:rgba(31,194,91,0.10);
+      border-color:rgba(31,194,91,0.25);
+    }
+
+    .inactive{
+      color:#ffd0d0;
+      background:rgba(255,107,107,0.10);
+      border-color:rgba(255,107,107,0.25);
+    }
+
+    .edit-form{
+      margin-top:14px;
+    }
+
+    .row-actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .empty{
+      padding:22px;
+      text-align:center;
+      color:var(--muted);
+      line-height:2;
+    }
+
+    @media (max-width:800px){
+      body{ padding:12px; }
+      .topbar{ flex-direction:column; }
+      .form-grid{ grid-template-columns:1fr; }
+      .top-actions{ width:100%; }
+      .btn-link{ flex:1; }
+    }
+  </style>
+  {% include "_theme_support.html" %}
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <div>
+        <h1>مدیریت پایگاه دانش FAQ</h1>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn-link" href="/admin/feedback-report">گزارش ادمین</a>
+        <a class="btn-link" href="/home">بازگشت به چت‌بات</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="section">
+      <h2><h2>افزودن پاسخ دانشی جدید</h2></h2>
+
+      <form method="post" action="/admin/faq">
+        <input type="hidden" name="source_unanswered_id" value="{{ source_unanswered_id or '' }}">
+
+        <div class="form-grid">
+          <div class="field full">
+            <label>سؤال</label>
+            <textarea name="question" required>{{ source_question or '' }}</textarea>
+          </div>
+
+          <div class="field full">
+            <label>پاسخ</label>
+            <textarea name="answer" required></textarea>
+          </div>
+
+          <div class="field">
+            <label>دسته</label>
+            <input name="category" value="عمومی">
+          </div>
+
+          <div class="field">
+            <label>اولویت</label>
+            <select name="priority">
+              <option value="high">بالا</option>
+              <option value="medium" selected>متوسط</option>
+              <option value="low">پایین</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>کلیدواژه‌ها</label>
+            <textarea name="keywords_text" placeholder="هر کلیدواژه را در یک خط بنویسید"></textarea>
+            <div class="help">
+              مثال: بکاپ، پشتیبان‌گیری، بازیابی، سال مالی، تعریف شرکت
+            </div>
+          </div>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn-primary" type="submit">ثبت در پایگاه دانش</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>لیست پاسخ‌های پایگاه دانش</h2>
+
+      {% if faq_items %}
+        <div class="faq-list">
+          {% for item in faq_items %}
+            <details>
+              <summary>
+                {{ item.question }}
+              </summary>
+
+              <div class="meta">
+                <span class="badge {% if item.is_active %}active{% else %}inactive{% endif %}">
+                  {% if item.is_active %}فعال{% else %}غیرفعال{% endif %}
+                </span>
+                <span class="badge">دسته: {{ item.category or 'عمومی' }}</span>
+                <span class="badge">اولویت: {{ item.priority or 'medium' }}</span>
+              </div>
+
+              <form class="edit-form" method="post" action="/admin/faq/{{ item.id }}/edit">
+                <div class="form-grid">
+                  <div class="field full">
+                    <label>سؤال</label>
+                    <textarea name="question" required>{{ item.question }}</textarea>
+                  </div>
+
+                  <div class="field full">
+                    <label>پاسخ</label>
+                    <textarea name="answer" required>{{ item.answer }}</textarea>
+                  </div>
+
+                  <div class="field">
+                    <label>دسته</label>
+                    <input name="category" value="{{ item.category or 'عمومی' }}">
+                  </div>
+
+                  <div class="field">
+                    <label>اولویت</label>
+                    <select name="priority">
+                      <option value="high" {% if item.priority == "high" %}selected{% endif %}>بالا</option>
+                      <option value="medium" {% if item.priority == "medium" %}selected{% endif %}>متوسط</option>
+                      <option value="low" {% if item.priority == "low" %}selected{% endif %}>پایین</option>
+                    </select>
+                  </div>
+
+                  <div class="field full">
+                    <label>کلیدواژه‌ها</label>
+                    <textarea name="keywords_text">{{ item.keywords_text or '' }}</textarea>
+                  </div>
+                </div>
+
+                <div class="row-actions">
+                  <button class="btn-primary" type="submit">ذخیره تغییرات</button>
+                </div>
+              </form>
+
+              <form method="post" action="/admin/faq/{{ item.id }}/toggle">
+                <div class="row-actions">
+                  {% if item.is_active %}
+                    <button class="btn-danger" type="submit">غیرفعال‌سازی</button>
+                  {% else %}
+                    <button class="btn-secondary" type="submit">فعال‌سازی دوباره</button>
+                  {% endif %}
+                </div>
+              </form>
+            </details>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">
+          هنوز FAQ ثبت نشده است.
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</body>
+{% include "_theme_support.html" %}
+</html>

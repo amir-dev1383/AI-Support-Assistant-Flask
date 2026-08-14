@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>گزارش فعالیت‌ها | مدریک</title>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#11161f;
+      --card2:#10151e;
+      --border:rgba(255,255,255,0.08);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --green:#1fc25b;
+      --red:#ff6b6b;
+      --yellow:#ffd166;
+      --blue:#6ea8ff;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,122,0,0.10), transparent 18%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 50%, #090b10 100%);
+      color:var(--text);
+      padding:22px;
+    }
+
+    .page{
+      width:100%;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.5;
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.9;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-link{
+      border:none;
+      border-radius:10px;
+      min-height:34px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      white-space:nowrap;
+      background:linear-gradient(135deg, var(--orange), var(--orange2));
+    }
+
+    .section{
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:17px;
+      line-height:1.6;
+      font-weight:900;
+    }
+
+    .section-title span{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+    }
+
+    .table-wrap{
+      width:100%;
+      overflow:auto;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:var(--card2);
+    }
+
+    table{
+      width:100%;
+      min-width:1050px;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      padding:11px 10px;
+      text-align:right;
+      vertical-align:top;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      font-size:12px;
+      line-height:1.9;
+    }
+
+    th{
+      background:#171d28;
+      color:#fff;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    td{
+      color:#e6ebf3;
+    }
+
+    tr:hover td{
+      background:rgba(255,122,0,0.035);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,0.10);
+      white-space:nowrap;
+    }
+
+    .action{
+      color:#ffe0c0;
+      background:rgba(255,122,0,0.12);
+      border-color:rgba(255,122,0,0.28);
+    }
+
+    .role{
+      color:#cfe0ff;
+      background:rgba(110,168,255,0.10);
+      border-color:rgba(110,168,255,0.25);
+    }
+
+    .entity{
+      color:#bfffd2;
+      background:rgba(31,194,91,0.10);
+      border-color:rgba(31,194,91,0.25);
+    }
+
+    .date{
+      color:#b9c1ce;
+      font-size:11px;
+      direction:ltr;
+      text-align:left;
+      white-space:nowrap;
+    }
+
+    .details{
+      color:#cfd6e2;
+      max-width:380px;
+      white-space:pre-line;
+      word-break:break-word;
+    }
+
+    .ip{
+      color:#cfd6e2;
+      direction:ltr;
+      text-align:left;
+      white-space:nowrap;
+    }
+
+    .empty{
+      padding:22px;
+      text-align:center;
+      color:var(--muted);
+      line-height:2;
+    }
+
+    @media (max-width:900px){
+      body{
+        padding:12px;
+      }
+
+      .topbar{
+        flex-direction:column;
+      }
+
+      .top-actions{
+        width:100%;
+      }
+
+      .btn-link{
+        flex:1;
+      }
+    }
+  </style>
+  {% include "_theme_support.html" %}
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <div>
+        <h1>گزارش فعالیت‌ها</h1>
+        <p class="subtitle">
+          در این بخش تغییرات مهم مدیریتی ثبت می‌شود تا مشخص باشد چه کسی، چه کاری و در چه زمانی انجام داده است.
+        </p>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn-link" href="/admin/feedback-report">پنل پشتیبانی</a>
+        <a class="btn-link" href="/admin/users">مدیریت کاربران</a>
+        <a class="btn-link" href="/admin/faq">پایگاه دانش</a>
+        <a class="btn-link" href="/home">بازگشت به چت‌بات</a>
+      </div>
+      {% include "_theme_support.html" %}
+    </header>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>آخرین فعالیت‌های ثبت‌شده</h2>
+        <span>نمایش ۳۰۰ فعالیت آخر</span>
+      </div>
+
+      {% if logs %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>زمان</th>
+                <th>کاربر</th>
+                <th>نقش</th>
+                <th>عملیات</th>
+                <th>بخش</th>
+                <th>شناسه</th>
+                <th>جزئیات</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for log in logs %}
+                <tr>
+                  <td class="date">{{ log.created_at }}</td>
+
+                  <td>
+                    {{ log.actor_username }}
+                  </td>
+
+                  <td>
+                    <span class="badge role">{{ log.actor_role }}</span>
+                  </td>
+
+                  <td>
+                    <span class="badge action">{{ log.action_label }}</span>
+                  </td>
+
+                  <td>
+                    <span class="badge entity">{{ log.entity_label }}</span>
+                  </td>
+
+                  <td>
+                    {{ log.entity_id }}
+                  </td>
+
+                  <td class="details">
+                    {{ log.details }}
+                  </td>
+
+                  <td class="ip">
+                    {{ log.ip_address }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">
+          هنوز فعالیتی ثبت نشده است.
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</body>
+{% include "_theme_support.html" %}
+</html>

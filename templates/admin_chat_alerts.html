@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>آلارم‌های چت</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Tahoma, Arial, sans-serif;
+      background:#0b0f19;
+      color:#fff;
+      padding:24px;
+    }
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+    }
+
+    a{
+      color:#fff;
+      text-decoration:none;
+      background:#ff7a00;
+      padding:8px 14px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:bold;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:rgba(255,255,255,0.04);
+      border-radius:16px;
+      overflow:hidden;
+    }
+
+    th, td{
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      text-align:right;
+      vertical-align:top;
+      font-size:12px;
+      line-height:1.8;
+    }
+
+    th{
+      background:rgba(255,122,0,0.16);
+      color:#ffd7b0;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#ff7a00;
+      color:#fff;
+      font-size:11px;
+      font-weight:bold;
+    }
+
+    .question{
+      color:#d6dce8;
+      max-width:420px;
+      white-space:pre-wrap;
+    }
+
+    .empty{
+      padding:24px;
+      background:rgba(255,255,255,0.05);
+      border-radius:14px;
+      color:#b8c0cf;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>آلارم‌های چت</h1>
+      <a href="{{ url_for('home') }}">بازگشت به چت</a>
+    </div>
+
+    {% if alerts %}
+      <table>
+        <thead>
+          <tr>
+            <th>زمان</th>
+            <th>کاربر</th>
+            <th>عنوان</th>
+            <th>پیام</th>
+            <th>متن کاربر</th>
+            <th>وضعیت</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in alerts %}
+            <tr>
+              <td>{{ alert.created_at }}</td>
+              <td>{{ alert.username }}</td>
+              <td>{{ alert.title }}</td>
+              <td>{{ alert.message }}</td>
+              <td class="question">{{ alert.source_question }}</td>
+              <td>
+                <span class="badge">{{ alert.status_label }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty">
+        هنوز آلارمی ثبت نشده است.
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

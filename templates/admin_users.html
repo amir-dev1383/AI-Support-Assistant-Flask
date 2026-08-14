@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدیریت کاربران | مدریک</title>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#11161f;
+      --card2:#151b26;
+      --border:rgba(255,255,255,0.08);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --green:#1fc25b;
+      --red:#ff6b6b;
+      --yellow:#ffd166;
+      --blue:#6ea8ff;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,122,0,0.10), transparent 18%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 50%, #090b10 100%);
+      color:var(--text);
+      padding:22px;
+    }
+
+    .page{
+      width:100%;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.5;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.9;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-link,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger{
+      border:none;
+      border-radius:10px;
+      min-height:34px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      white-space:nowrap;
+      font-family:Tahoma, Arial, sans-serif;
+    }
+
+    .btn-link,
+    .btn-primary{
+      background:linear-gradient(135deg, var(--orange), var(--orange2));
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.10);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.25);
+      color:#ffd0d0;
+    }
+
+    .flash-wrap{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .flash{
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.8;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.04);
+    }
+
+    .flash.success{
+      color:#bfffd2;
+      border-color:rgba(31,194,91,0.24);
+      background:rgba(31,194,91,0.08);
+    }
+
+    .flash.error{
+      color:#ffd0d0;
+      border-color:rgba(255,107,107,0.24);
+      background:rgba(255,107,107,0.08);
+    }
+
+    .section{
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:17px;
+      line-height:1.6;
+    }
+
+    .section-title span{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    input,
+    select{
+      width:100%;
+      height:38px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:#10151e;
+      color:var(--text);
+      font-size:12px;
+      padding:0 10px;
+      outline:none;
+      font-family:Tahoma, Arial, sans-serif;
+    }
+
+    input::placeholder{
+      color:#7f8796;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+      margin-top:8px;
+    }
+
+    .users-list{
+      display:grid;
+      gap:12px;
+    }
+
+    details{
+      background:#10151e;
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    summary{
+      cursor:pointer;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.9;
+      color:#fff;
+    }
+
+    .meta{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,0.10);
+      white-space:nowrap;
+    }
+
+    .active{
+      color:#bfffd2;
+      background:rgba(31,194,91,0.10);
+      border-color:rgba(31,194,91,0.25);
+    }
+
+    .inactive{
+      color:#ffd0d0;
+      background:rgba(255,107,107,0.10);
+      border-color:rgba(255,107,107,0.25);
+    }
+
+    .role{
+      color:#cfe0ff;
+      background:rgba(110,168,255,0.10);
+      border-color:rgba(110,168,255,0.25);
+    }
+
+    .admin-role{
+      color:#ffe0c0;
+      background:rgba(255,122,0,0.12);
+      border-color:rgba(255,122,0,0.28);
+    }
+
+    .edit-form{
+      margin-top:14px;
+    }
+
+    .row-actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .box{
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,0.025);
+    }
+
+    .box h3{
+      margin:0 0 10px;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .empty{
+      padding:22px;
+      text-align:center;
+      color:var(--muted);
+      line-height:2;
+    }
+
+    .warning-note{
+      margin-top:10px;
+      color:#ffd166;
+      background:rgba(255,209,102,0.07);
+      border:1px solid rgba(255,209,102,0.18);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:11px;
+      line-height:1.9;
+    }
+
+    @media (max-width:900px){
+      body{
+        padding:12px;
+      }
+
+      .topbar{
+        flex-direction:column;
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .split{
+        grid-template-columns:1fr;
+      }
+
+      .top-actions{
+        width:100%;
+      }
+
+      .btn-link{
+        flex:1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <div>
+        <h1>مدیریت کاربران</h1>
+        <p class="subtitle">
+          در این بخش کاربران داخلی سامانه، نقش‌ها، وضعیت حساب و رمز عبور اولیه مدیریت می‌شود.
+        </p>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn-link" href="/admin/feedback-report">پنل پشتیبانی</a>
+        <a class="btn-link" href="/admin/faq">پایگاه دانش</a>
+        <a class="btn-link" href="/home">بازگشت به چت‌بات</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="section">
+      <div class="section-title">
+        <h2>ایجاد کاربر جدید</h2>
+        <span>برای هر نفر حساب جدا بسازید؛ استفاده مشترک از admin اشتباه است.</span>
+      </div>
+
+      <form method="post" action="/admin/users">
+        <div class="form-grid">
+          <div class="field">
+            <label>نام کاربری</label>
+            <input name="username" required placeholder="مثلاً support1">
+          </div>
+
+          <div class="field">
+            <label>نام و نام خانوادگی</label>
+            <input name="full_name" placeholder="مثلاً کارشناس پشتیبانی">
+          </div>
+
+          <div class="field">
+            <label>ایمیل</label>
+            <input name="email" type="email" placeholder="اختیاری">
+          </div>
+
+          <div class="field">
+            <label>نقش</label>
+            <select name="role">
+              {% for role_key, role_label in role_options.items() %}
+                <option value="{{ role_key }}" {% if role_key == "support_agent" %}selected{% endif %}>
+                  {{ role_label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>رمز عبور اولیه</label>
+            <input name="password" type="password" required placeholder="حداقل ۶ کاراکتر">
+          </div>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn-primary" type="submit">ایجاد کاربر</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>لیست کاربران</h2>
+        <span>ویرایش اطلاعات، نقش، وضعیت حساب و رمز عبور</span>
+      </div>
+
+      {% if users %}
+        <div class="users-list">
+          {% for user in users %}
+            <details>
+              <summary>
+                {{ user.username }}
+                {% if user.full_name %}
+                  — {{ user.full_name }}
+                {% endif %}
+              </summary>
+
+              <div class="meta">
+                <span class="badge {% if user.is_active %}active{% else %}inactive{% endif %}">
+                  {% if user.is_active %}فعال{% else %}غیرفعال{% endif %}
+                </span>
+
+                <span class="badge {% if user.role == 'admin' %}admin-role{% else %}role{% endif %}">
+                  نقش: {{ user.role_label }}
+                </span>
+
+                <span class="badge">
+                  آخرین ورود: {{ user.last_login_at }}
+                </span>
+
+                <span class="badge">
+                  ساخته‌شده: {{ user.created_at }}
+                </span>
+              </div>
+
+              <div class="split">
+                <div class="box">
+                  <h3>ویرایش اطلاعات کاربر</h3>
+
+                  <form class="edit-form" method="post" action="/admin/users/{{ user.id }}/update">
+                    <div class="form-grid">
+                      <div class="field">
+                        <label>نام و نام خانوادگی</label>
+                        <input name="full_name" value="{{ user.full_name }}">
+                      </div>
+
+                      <div class="field">
+                        <label>ایمیل</label>
+                        <input name="email" type="email" value="{{ user.email }}">
+                      </div>
+
+                      <div class="field full">
+                        <label>نقش</label>
+                        <select name="role">
+                          {% for role_key, role_label in role_options.items() %}
+                            <option value="{{ role_key }}" {% if user.role == role_key %}selected{% endif %}>
+                              {{ role_label }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="row-actions">
+                      <button class="btn-primary" type="submit">ذخیره تغییرات</button>
+                    </div>
+                  </form>
+
+                  <form method="post" action="/admin/users/{{ user.id }}/toggle">
+                    <div class="row-actions">
+                      {% if user.is_active %}
+                        <button class="btn-danger" type="submit">غیرفعال‌سازی کاربر</button>
+                      {% else %}
+                        <button class="btn-secondary" type="submit">فعال‌سازی دوباره</button>
+                      {% endif %}
+                    </div>
+                  </form>
+                </div>
+
+                <div class="box">
+                  <h3>تغییر رمز عبور</h3>
+
+                  <form method="post" action="/admin/users/{{ user.id }}/reset-password">
+                    <div class="form-grid">
+                      <div class="field">
+                        <label>رمز عبور جدید</label>
+                        <input name="new_password" type="password" placeholder="حداقل ۶ کاراکتر">
+                      </div>
+
+                      <div class="field">
+                        <label>تکرار رمز عبور جدید</label>
+                        <input name="confirm_password" type="password" placeholder="تکرار رمز">
+                      </div>
+                    </div>
+
+                    <div class="row-actions">
+                      <button class="btn-secondary" type="submit">تغییر رمز</button>
+                    </div>
+                  </form>
+
+                  <div class="hint">
+                    تلاش ناموفق ورود: {{ user.failed_login_attempts }}
+                    <br>
+                    وضعیت قفل حساب: {{ user.locked_until }}
+                  </div>
+                </div>
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">
+          هنوز کاربری ثبت نشده است.
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</body>
+{% include "_theme_support.html" %}
+</html>

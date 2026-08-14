@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>افزودن به پایگاه دانش</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,122,0,0.14), transparent 24%),
+        linear-gradient(135deg, #080a0f 0%, #111722 55%, #080b11 100%);
+      color:#f5f7fb;
+      padding:24px;
+    }
+
+    .page{
+      width:100%;
+      max-width:820px;
+      margin:0 auto;
+    }
+
+    .card{
+      border-radius:24px;
+      background:rgba(255,255,255,0.045);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 24px 70px rgba(0,0,0,0.35);
+      padding:24px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:22px;
+      font-weight:900;
+    }
+
+    p{
+      margin:0 0 18px;
+      color:#a3adbd;
+      font-size:12px;
+      line-height:1.9;
+    }
+
+    .messages{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .alert{
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:12px;
+      line-height:1.8;
+    }
+
+    .alert.success{
+      background:rgba(31,194,91,0.12);
+      border:1px solid rgba(31,194,91,0.24);
+      color:#a8f4bd;
+    }
+
+    .alert.error{
+      background:rgba(255,107,107,0.12);
+      border:1px solid rgba(255,107,107,0.24);
+      color:#ffb7b7;
+    }
+
+    form{
+      display:grid;
+      gap:14px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:6px;
+      color:#ffd4a8;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    input, textarea, select{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06);
+      color:#fff;
+      padding:11px 12px;
+      font-family:Tahoma, Arial, sans-serif;
+      font-size:12px;
+      outline:none;
+    }
+
+    textarea{
+      min-height:150px;
+      resize:vertical;
+      line-height:1.9;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus{
+      border-color:rgba(255,122,0,0.55);
+      box-shadow:0 0 0 3px rgba(255,122,0,0.12);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 180px;
+      gap:12px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+
+    button, a{
+      height:42px;
+      padding:0 16px;
+      border-radius:13px;
+      border:none;
+      font-family:Tahoma, Arial, sans-serif;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    button{
+      background:linear-gradient(135deg, #ff7a00, #ff9a3d);
+      color:#fff;
+    }
+
+    a{
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.12);
+    }
+
+    .hint{
+      font-size:11px;
+      color:#8e98aa;
+      line-height:1.8;
+      margin-top:5px;
+    }
+
+    @media (max-width:700px){
+      body{ padding:12px; }
+      .row{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="card">
+      <h1>افزودن سؤال به پایگاه دانش</h1>
+      <p>از این صفحه می‌توانید سؤال بی‌پاسخ را به یک پاسخ رسمی در پایگاه دانش تبدیل کنید.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages">
+            {% for category, message in messages %}
+              <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        <div class="row">
+          <div>
+            <label>دسته‌بندی</label>
+            <input name="category" value="عمومی" placeholder="مثلاً مدیریت سیستم، حسابداری، پشتیبانی">
+          </div>
+
+          <div>
+            <label>اولویت</label>
+            <select name="priority">
+              <option value="high">زیاد</option>
+              <option value="medium" selected>متوسط</option>
+              <option value="low">کم</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label>سؤال</label>
+          <input name="question" value="{{ question }}" required>
+        </div>
+
+        <div>
+          <label>پاسخ رسمی</label>
+          <textarea name="answer" required placeholder="پاسخ کامل و قابل استفاده برای کاربر را اینجا بنویسید..."></textarea>
+        </div>
+
+        <div>
+          <label>کلیدواژه‌ها</label>
+          <input name="keywords" placeholder="مثلاً ورود، رمز، پسورد، لاگین">
+          <div class="hint">کلیدواژه‌ها را با ویرگول جدا کنید. این بخش باعث می‌شود جستجو بهتر کار کند.</div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">ذخیره در پایگاه دانش</button>
+          <a href="/admin/feedback-report">بازگشت به گزارش</a>
+          <a href="/">بازگشت به چت</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

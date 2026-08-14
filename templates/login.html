@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ورود به سامانه مدریک</title>
+
+  <style>
+    
+    :root{
+      --bg:#080a0f;
+      --card:#131720;
+      --card2:#171d28;
+      --border:rgba(255,255,255,0.08);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --danger:#ffb7b7;
+      --success:#9df3b7;
+      --warning:#ffd08a;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html, body{
+      margin:0;
+      width:100%;
+      height:100%;
+      font-family:"Vazirmatn", Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255,122,0,0.16), transparent 20%),
+        radial-gradient(circle at 85% 88%, rgba(255,122,0,0.08), transparent 18%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 48%, #090b10 100%);
+      color:var(--text);
+    }
+
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .login-shell{
+      width:100%;
+      max-width:980px;
+      min-height:560px;
+      display:grid;
+      grid-template-columns:1fr 420px;
+      border:1px solid var(--border);
+      border-radius:28px;
+      overflow:hidden;
+      background:rgba(19,23,32,0.86);
+      box-shadow:0 28px 80px rgba(0,0,0,0.42);
+    }
+
+    .intro-panel{
+      padding:36px;
+      background:
+        linear-gradient(180deg, rgba(255,122,0,0.10), transparent 42%),
+        linear-gradient(135deg, #111721 0%, #0d1119 100%);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border-left:1px solid var(--border);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand-mark{
+      width:52px;
+      height:52px;
+      border-radius:17px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, var(--orange), var(--orange2));
+      font-size:24px;
+      font-weight:900;
+      color:#fff;
+      box-shadow:0 18px 34px rgba(255,122,0,0.22);
+    }
+
+    .brand-text h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.3;
+      font-weight:900;
+    }
+
+    .brand-text p{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .intro-content h2{
+      margin:0 0 12px;
+      font-size:30px;
+      line-height:1.5;
+      font-weight:900;
+      letter-spacing:-0.4px;
+    }
+
+    .intro-content p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:2.1;
+      max-width:440px;
+    }
+
+    .intro-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .badge{
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      color:#dfe4ee;
+      font-size:11px;
+    }
+
+    .form-panel{
+      padding:34px 30px;
+      background:linear-gradient(180deg, #151a24 0%, #10141d 100%);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .form-title{
+      margin-bottom:22px;
+    }
+
+    .form-title h2{
+      margin:0 0 8px;
+      font-size:24px;
+      font-weight:900;
+      line-height:1.4;
+    }
+
+    .form-title p{
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.9;
+    }
+
+    .alert{
+      width:100%;
+      margin-bottom:14px;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:12px;
+      line-height:1.8;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+    }
+
+    .alert.error{
+      color:var(--danger);
+      border-color:rgba(255,80,80,0.18);
+      background:rgba(255,80,80,0.06);
+    }
+
+    .alert.success{
+      color:var(--success);
+      border-color:rgba(80,255,120,0.16);
+      background:rgba(80,255,120,0.06);
+    }
+
+    .alert.warning{
+      color:var(--warning);
+      border-color:rgba(255,180,80,0.18);
+      background:rgba(255,180,80,0.06);
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:7px;
+      font-size:12px;
+      color:#eef2f8;
+      font-weight:700;
+    }
+
+    input{
+      width:100%;
+      height:46px;
+      border:none;
+      outline:none;
+      border-radius:13px;
+      padding:0 12px;
+      background:#0f131b;
+      color:#fff;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,0.08);
+      transition:0.15s ease;
+    }
+
+    input:focus{
+      border-color:rgba(255,122,0,0.45);
+      box-shadow:0 0 0 4px rgba(255,122,0,0.08);
+    }
+
+    .password-wrap{
+      position:relative;
+    }
+
+    .password-wrap input{
+      padding-left:74px;
+    }
+
+    .toggle-password{
+      position:absolute;
+      left:8px;
+      top:50%;
+      transform:translateY(-50%);
+      height:30px;
+      border:none;
+      border-radius:9px;
+      padding:0 10px;
+      background:rgba(255,255,255,0.06);
+      color:#dce2ec;
+      font-size:10px;
+      cursor:pointer;
+    }
+
+    .actions-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin:6px 0 16px;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .actions-row a{
+      color:#ffbd84;
+      text-decoration:none;
+    }
+
+    .submit-btn{
+      width:100%;
+      height:46px;
+      border:none;
+      border-radius:13px;
+      background:linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%);
+      color:#fff;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 16px 30px rgba(255,122,0,0.20);
+    }
+
+    .submit-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .help-text{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.9;
+      text-align:center;
+    }
+
+    .help-text strong{
+      color:#fff;
+      font-weight:800;
+    }
+
+    @media (max-width: 860px){
+      .login-shell{
+        grid-template-columns:1fr;
+        max-width:430px;
+      }
+
+      .intro-panel{
+        display:none;
+      }
+    }
+        /* Premium Login Upgrade */
+body{
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255,122,0,0.16), transparent 24%),
+    radial-gradient(circle at 84% 78%, rgba(255,154,61,0.10), transparent 22%),
+    linear-gradient(135deg, #07080c 0%, #0d1016 48%, #090b10 100%);
+}
+
+.login-card,
+.auth-card,
+.login-container,
+.auth-container{
+  position:relative;
+}
+
+.login-card::before,
+.auth-card::before,
+.login-container::before,
+.auth-container::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:28px;
+  padding:1px;
+  background:linear-gradient(
+    135deg,
+    rgba(255,122,0,0.42),
+    rgba(255,255,255,0.08),
+    rgba(255,122,0,0.14)
+  );
+  pointer-events:none;
+  opacity:0.65;
+}
+
+.login-card::after,
+.auth-card::after,
+.login-container::after,
+.auth-container::after{
+  content:"";
+  position:absolute;
+  width:260px;
+  height:260px;
+  right:58%;
+  top:-110px;
+  background:radial-gradient(circle, rgba(255,122,0,0.16), transparent 64%);
+  filter:blur(4px);
+  pointer-events:none;
+}
+
+.form-panel,
+.login-panel{
+  position:relative;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,122,0,0.07), transparent 28%),
+    linear-gradient(180deg, rgba(17,22,31,0.96), rgba(12,16,23,0.98)) !important;
+  border-right:1px solid rgba(255,255,255,0.06);
+}
+
+.intro-panel{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 82% 16%, rgba(255,122,0,0.20), transparent 24%),
+    radial-gradient(circle at 18% 86%, rgba(255,154,61,0.08), transparent 26%),
+    linear-gradient(145deg, #19120f 0%, #0f1219 58%, #0a0d13 100%) !important;
+}
+
+.intro-panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size:34px 34px;
+  opacity:0.16;
+  pointer-events:none;
+}
+
+.intro-panel::after{
+  content:"";
+  position:absolute;
+  width:380px;
+  height:380px;
+  left:-160px;
+  bottom:-190px;
+  background:radial-gradient(circle, rgba(255,122,0,0.18), transparent 62%);
+  pointer-events:none;
+}
+
+.brand-mark,
+.logo-mark{
+  box-shadow:
+    0 16px 34px rgba(255,122,0,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.28) !important;
+}
+
+input{
+  transition:0.18s ease;
+}
+
+input:focus{
+  border-color:rgba(255,122,0,0.62) !important;
+  box-shadow:0 0 0 3px rgba(255,122,0,0.10) !important;
+}
+
+button[type="submit"],
+.login-btn,
+.submit-btn{
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 16px 34px rgba(255,122,0,0.26);
+  transition:0.18s ease;
+}
+
+button[type="submit"]:hover,
+.login-btn:hover,
+.submit-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 20px 42px rgba(255,122,0,0.34);
+}
+
+button[type="submit"]::before,
+.login-btn::before,
+.submit-btn::before{
+  content:"";
+  position:absolute;
+  top:0;
+  right:-70%;
+  width:55%;
+  height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+  transform:skewX(-18deg);
+  transition:0.45s ease;
+}
+
+button[type="submit"]:hover::before,
+.login-btn:hover::before,
+.submit-btn:hover::before{
+  right:120%;
+}
+
+.forgot-link{
+  transition:0.16s ease;
+}
+
+.forgot-link:hover{
+  color:#ff9a3d !important;
+}
+
+.intro-panel h1,
+.intro-panel h2,
+.intro-panel h3{
+  position:relative;
+  z-index:1;
+  letter-spacing:-0.4px;
+}
+
+.intro-panel p,
+.intro-panel span{
+  position:relative;
+  z-index:1;
+}
+
+.intro-panel .pill,
+.intro-panel .tag,
+.intro-panel .feature-pill{
+  position:relative;
+  z-index:1;
+  backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.045) !important;
+  border:1px solid rgba(255,255,255,0.10) !important;
+  color:#dbe3ee !important;
+}
+
+/* Light Mode Premium Login */
+html.light-mode body{
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255,122,0,0.20), transparent 25%),
+    radial-gradient(circle at 86% 82%, rgba(180,93,20,0.12), transparent 24%),
+    linear-gradient(135deg, #e1d7ca 0%, #f1e8dd 48%, #d3c8ba 100%) !important;
+}
+
+html.light-mode .login-card,
+html.light-mode .auth-card,
+html.light-mode .login-container,
+html.light-mode .auth-container{
+  box-shadow:0 28px 70px rgba(78,49,21,0.20) !important;
+}
+
+html.light-mode .form-panel,
+html.light-mode .login-panel{
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255,122,0,0.12), transparent 28%),
+    linear-gradient(180deg, #fff6ea 0%, #eee2d2 100%) !important;
+  border-right:1px solid rgba(180,93,20,0.22) !important;
+  color:#172033 !important;
+}
+
+html.light-mode .intro-panel{
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255,122,0,0.26), transparent 24%),
+    radial-gradient(circle at 18% 84%, rgba(255,154,61,0.13), transparent 26%),
+    linear-gradient(145deg, #eadcc9 0%, #d8c9b7 52%, #cbbbaa 100%) !important;
+  color:#172033 !important;
+}
+
+html.light-mode .intro-panel::before{
+  background-image:
+    linear-gradient(rgba(90,57,24,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90,57,24,0.07) 1px, transparent 1px);
+  opacity:0.24;
+}
+
+html.light-mode .intro-panel h1,
+html.light-mode .intro-panel h2,
+html.light-mode .intro-panel h3,
+html.light-mode .form-panel h1,
+html.light-mode .form-panel h2,
+html.light-mode .login-panel h1,
+html.light-mode .login-panel h2{
+  color:#172033 !important;
+}
+
+html.light-mode .intro-panel p,
+html.light-mode .intro-panel span,
+html.light-mode .form-panel p,
+html.light-mode .form-panel span,
+html.light-mode .login-panel p,
+html.light-mode .login-panel span,
+html.light-mode label{
+  color:#4b5563 !important;
+}
+
+html.light-mode input{
+  background:#fffaf2 !important;
+  border:1px solid rgba(180,93,20,0.30) !important;
+  color:#111827 !important;
+}
+
+html.light-mode input::placeholder{
+  color:#8a94a6 !important;
+}
+
+html.light-mode .intro-panel .pill,
+html.light-mode .intro-panel .tag,
+html.light-mode .intro-panel .feature-pill{
+  background:rgba(255,255,255,0.38) !important;
+  border:1px solid rgba(180,93,20,0.22) !important;
+  color:#743600 !important;
+}
+
+  </style>
+{% include "_theme_support.html" %}  
+</head>
+
+<body class="login-page">  <div class="login-shell">
+    <section class="intro-panel">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <h1>مدریک</h1>
+          <p>سامانه پشتیبانی هوشمند</p>
+        </div>
+      </div>
+
+      <div class="intro-content">
+        <h2>ورود به سامانه حسابداری مدریک</h2>
+        <p>
+          این بخش برای پاسخ‌گویی سریع، دقیق و ساختارمند به پرسش‌های مالی، حسابداری و سامانه مؤدیان طراحی شده است.
+        </p>
+      </div>
+
+      <div class="intro-badges">
+        <span class="badge">ورود امن</span>
+        <span class="badge">پشتیبانی هوشمند</span>
+        <span class="badge">مدیریت دسترسی</span>
+      </div>
+    </section>
+<section class="form-panel login-glass-box">
+  <div class="form-title">
+    <h2>ورود به حساب کاربری</h2>
+    <p>نام کاربری و رمز عبور خود را وارد کنید.</p>
+  </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+<form class="login-glass-card" method="post">        <div class="field">
+          <label for="username">نام کاربری</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            value="{{ username or '' }}"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">رمز عبور</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+            <button class="toggle-password" type="button" id="togglePassword">نمایش</button>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <span>دسترسی شما توسط مدیر سیستم تعریف می‌شود.</span>
+          <a href="/forgot-password">فراموشی رمز؟</a>
+        </div>
+
+        <button class="submit-btn" type="submit">ورود به سامانه</button>
+      </form>
+
+      <div class="help-text">
+        در صورت نداشتن حساب کاربری، با <strong>مدیر سیستم</strong> تماس بگیرید.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    toggleBtn.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      toggleBtn.textContent = isPassword ? "مخفی" : "نمایش";
+    });
+
+  </script>
+  
+</body>
+{% include "_theme_support.html" %}
+</html>

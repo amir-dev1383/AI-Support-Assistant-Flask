@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>کلیدواژه‌های هوشمند | مدریک</title>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#11161f;
+      --card2:#151b26;
+      --border:rgba(255,255,255,0.08);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --green:#1fc25b;
+      --red:#ff6b6b;
+      --yellow:#ffd166;
+      --blue:#6ea8ff;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,122,0,0.10), transparent 18%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 50%, #090b10 100%);
+      color:var(--text);
+      padding:22px;
+    }
+
+    .page{
+      width:100%;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0;
+      font-size:25px;
+      line-height:1.5;
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.9;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-link,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger{
+      border:none;
+      border-radius:10px;
+      min-height:34px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      white-space:nowrap;
+      font-family:Tahoma, Arial, sans-serif;
+    }
+
+    .btn-link,
+    .btn-primary{
+      background:linear-gradient(135deg, var(--orange), var(--orange2));
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.10);
+    }
+
+    .btn-danger{
+      background:rgba(255,107,107,0.14);
+      border:1px solid rgba(255,107,107,0.25);
+      color:#ffd0d0;
+    }
+
+    .flash-wrap{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .flash{
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.8;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.04);
+    }
+
+    .flash.success{
+      color:#bfffd2;
+      border-color:rgba(31,194,91,0.24);
+      background:rgba(31,194,91,0.08);
+    }
+
+    .flash.error{
+      color:#ffd0d0;
+      border-color:rgba(255,107,107,0.24);
+      background:rgba(255,107,107,0.08);
+    }
+
+    .section{
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:17px;
+      line-height:1.6;
+      font-weight:900;
+    }
+
+    .section-title span{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    input,
+    textarea{
+      width:100%;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:#10151e;
+      color:var(--text);
+      font-size:12px;
+      line-height:1.8;
+      padding:9px 10px;
+      outline:none;
+      font-family:Tahoma, Arial, sans-serif;
+    }
+
+    textarea{
+      min-height:105px;
+      resize:vertical;
+    }
+
+    input{
+      height:38px;
+    }
+
+    .help{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.8;
+    }
+
+    .keyword-list{
+      display:grid;
+      gap:12px;
+    }
+
+    details{
+      background:#10151e;
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    summary{
+      cursor:pointer;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.9;
+      color:#fff;
+    }
+
+    .meta{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,0.10);
+      white-space:nowrap;
+    }
+
+    .active{
+      color:#bfffd2;
+      background:rgba(31,194,91,0.10);
+      border-color:rgba(31,194,91,0.25);
+    }
+
+    .inactive{
+      color:#ffd0d0;
+      background:rgba(255,107,107,0.10);
+      border-color:rgba(255,107,107,0.25);
+    }
+
+    .category{
+      color:#cfe0ff;
+      background:rgba(110,168,255,0.10);
+      border-color:rgba(110,168,255,0.25);
+    }
+
+    .edit-form{
+      margin-top:14px;
+    }
+
+    .row-actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .empty{
+      padding:22px;
+      text-align:center;
+      color:var(--muted);
+      line-height:2;
+    }
+
+    @media (max-width:900px){
+      body{
+        padding:12px;
+      }
+
+      .topbar{
+        flex-direction:column;
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .top-actions{
+        width:100%;
+      }
+
+      .btn-link{
+        flex:1;
+      }
+    }
+  </style>
+  {% include "_theme_support.html" %}
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <div>
+        <h1>کلیدواژه‌های هوشمند</h1>
+        <p class="subtitle">
+          در این بخش کلمات مرتبط و هم‌معنی برای بهتر فهمیدن سؤال‌های کاربران مدیریت می‌شود.
+        </p>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn-link" href="/admin/feedback-report">پنل پشتیبانی</a>
+        <a class="btn-link" href="/admin/faq">پایگاه دانش</a>
+        <a class="btn-link" href="/home">بازگشت به چت‌بات</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="section">
+      <div class="section-title">
+        <h2>افزودن گروه کلیدواژه جدید</h2>
+        <span>هر گروه یک مفهوم پشتیبانی را پوشش می‌دهد</span>
+      </div>
+
+      <form method="post" action="/admin/keyword-groups">
+        <div class="form-grid">
+          <div class="field">
+            <label>عنوان مفهوم</label>
+            <input name="title" required placeholder="مثلاً صدور فاکتور">
+          </div>
+
+          <div class="field">
+            <label>دسته</label>
+            <input name="category" placeholder="مثلاً فروش / سامانه مودیان">
+          </div>
+
+          <div class="field full">
+            <label>کلیدواژه‌ها</label>
+            <textarea name="keywords_text" required placeholder="هر کلیدواژه را در یک خط بنویسید"></textarea>
+            <div class="help">
+              مثال:
+              فاکتور، صورتحساب، صدور فاکتور، ارسال به مودیان، شماره فاکتور، فروش ثبت نمی‌شود
+            </div>
+          </div>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn-primary" type="submit">ثبت گروه کلیدواژه</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>لیست گروه‌های کلیدواژه</h2>
+        <span>گروه‌های فعال در موتور جستجوی پاسخ استفاده می‌شوند</span>
+      </div>
+
+      {% if keyword_groups %}
+        <div class="keyword-list">
+          {% for item in keyword_groups %}
+            <details>
+              <summary>
+                {{ item.title }}
+              </summary>
+
+              <div class="meta">
+                <span class="badge {% if item.is_active %}active{% else %}inactive{% endif %}">
+                  {% if item.is_active %}فعال{% else %}غیرفعال{% endif %}
+                </span>
+
+                <span class="badge category">
+                  دسته: {{ item.category or 'بدون دسته' }}
+                </span>
+
+                <span class="badge">
+                  آخرین ویرایش: {{ item.updated_at }}
+                </span>
+              </div>
+
+              <form class="edit-form" method="post" action="/admin/keyword-groups/{{ item.id }}/edit">
+                <div class="form-grid">
+                  <div class="field">
+                    <label>عنوان مفهوم</label>
+                    <input name="title" value="{{ item.title }}" required>
+                  </div>
+
+                  <div class="field">
+                    <label>دسته</label>
+                    <input name="category" value="{{ item.category or '' }}">
+                  </div>
+
+                  <div class="field full">
+                    <label>کلیدواژه‌ها</label>
+                    <textarea name="keywords_text" required>{{ item.keywords_text }}</textarea>
+                  </div>
+                </div>
+
+                <div class="row-actions">
+                  <button class="btn-primary" type="submit">ذخیره تغییرات</button>
+                </div>
+              </form>
+
+              <form method="post" action="/admin/keyword-groups/{{ item.id }}/toggle">
+                <div class="row-actions">
+                  {% if item.is_active %}
+                    <button class="btn-danger" type="submit">غیرفعال‌سازی</button>
+                  {% else %}
+                    <button class="btn-secondary" type="submit">فعال‌سازی دوباره</button>
+                  {% endif %}
+                </div>
+              </form>
+            </details>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">
+          هنوز گروه کلیدواژه‌ای ثبت نشده است.
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</body>
+{% include "_theme_support.html" %}
+</html>

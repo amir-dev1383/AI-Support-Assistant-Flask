@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دستیار هوشمند مدریک</title>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --main:#0d1016;
+      --panel:#11161f;
+      --card:rgba(255,255,255,0.035);
+      --border:rgba(255,255,255,0.08);
+      --border-soft:rgba(255,255,255,0.05);
+      --text:#f4f6fa;
+      --muted:#a2a9b7;
+      --muted2:#7c8697;
+      --orange:#ff7a00;
+      --orange2:#ff9a3d;
+      --green:#1fc25b;
+      --danger:#ffb7b7;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family:"Vazirmatn", Tahoma, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,122,0,0.10), transparent 18%),
+        radial-gradient(circle at 90% 88%, rgba(255,122,0,0.07), transparent 16%),
+        linear-gradient(135deg, #07080c 0%, #0d1016 48%, #090b10 100%);
+    }
+
+    body{ height:100vh; }
+
+    .app-shell{
+      width:100vw;
+      height:100vh;
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 520px;
+      grid-template-areas:"main side";
+      direction:ltr;
+      overflow:hidden;
+    }
+
+    .main,
+    .side-panel{ direction:rtl; }
+
+    .main{
+      grid-area:main;
+      min-width:0;
+      min-height:0;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      background:linear-gradient(180deg, #0d1016 0%, #11161f 100%);
+    }
+
+    .side-panel{
+      grid-area:side;
+      min-width:0;
+      min-height:0;
+      height:100vh;
+      border-left:1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,122,0,0.08), transparent 22%),
+        linear-gradient(180deg, #0d1016 0%, #11161f 100%);
+      padding:14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-shrink:0;
+    }
+
+    .brand-mark{
+      width:42px;
+      height:42px;
+      border-radius:13px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%);
+      color:#fff;
+      font-size:19px;
+      font-weight:900;
+      flex-shrink:0;
+    }
+
+    .brand-text h1{
+      margin:0;
+      font-size:19px;
+      line-height:1.2;
+      font-weight:900;
+    }
+
+    .brand-text p{
+      margin:4px 0 0;
+      font-size:10.5px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+        .menu-workspace{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns: 1fr 170px;
+      gap:12px;
+      direction:ltr;
+      overflow:hidden;
+    }
+
+    .questions-panel,
+.groups-panel{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-content:stretch;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:10px;
+}
+
+.groups-panel::-webkit-scrollbar{
+  width:7px;
+}
+
+.groups-panel::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;
+}
+
+.group-item{
+  width:100%;
+  min-height:52px;
+  border:none;
+  border-radius:13px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.055);
+  color:#f1f4f8;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.8;
+  cursor:pointer;
+  padding:11px 12px;
+  text-align:right;
+  transition:0.15s ease;
+  overflow:hidden;
+  white-space:normal;
+  word-break:break-word;
+}
+
+.group-item:hover{
+  background:rgba(255,122,0,0.08);
+  border-color:rgba(255,122,0,0.18);
+}
+
+.group-item.active{
+  background:linear-gradient(135deg, rgba(255,122,0,0.16), rgba(255,122,0,0.07));
+  border-color:rgba(255,122,0,0.30);
+  color:#fff3e6;
+}
+
+    .question-header{
+  flex-shrink:0;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.question-header h3{
+  margin:0 0 4px;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.5;
+}
+
+.question-header p{
+  margin:0;
+  font-size:10px;
+  color:var(--muted);
+  line-height:1.8;
+}
+   .question-list{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:4px 2px 4px 2px;
+}
+
+.question-list::-webkit-scrollbar{
+  width:7px;
+}
+
+.question-list::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;
+}
+
+.question-chip{
+  width:100%;
+  display:block;
+  border:none;
+  outline:none;
+  box-sizing:border-box;
+  min-height:48px;
+  padding:10px 14px;
+  border-radius:12px;
+  background:rgba(255,122,0,0.07);
+  border:1px solid rgba(255,122,0,0.20);
+  color:#ffe5c9;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.9;
+  text-align:right;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  cursor:pointer;
+  transition:0.15s ease;
+  overflow:hidden;
+}
+
+.question-chip:hover{
+  background:rgba(255,122,0,0.13);
+  border-color:rgba(255,122,0,0.34);
+  color:#fff7ef;
+}
+.question-chip:active{
+  transform:translateY(0);
+}
+body.light-mode .question-chip,
+html.light-mode body .question-chip{
+  background:#ffffff !important;
+  border:1.5px solid rgba(201,93,0,0.20) !important;
+  color:#1f2937 !important;
+  box-shadow:0 6px 16px rgba(15,23,42,0.06);
+}
+
+body.light-mode .question-chip:hover,
+html.light-mode body .question-chip:hover{
+  background:#fff7ed !important;
+  border-color:rgba(255,122,0,0.45) !important;
+  color:#5c2b00 !important;
+}
+
+
+    .mini-note{
+      font-size:11px;
+      line-height:1.8;
+      color:var(--muted2);
+      padding:0 2px;
+      text-align:center;
+    }
+
+
+    .admin-report-btn:hover{
+      background:rgba(255,122,0,0.10);
+      border-color:rgba(255,122,0,0.24);
+      color:#fff;
+    }
+
+    .logout-form{
+      margin:0;
+      display:flex;
+      justify-content:center;
+    }
+
+    .logout-btn{
+      width:65%;
+      max-width:180px;
+      height:32px;
+      padding:0 14px;
+      border:none;
+      border-radius:9px;
+      background:linear-gradient(135deg, var(--orange) 0%, #ff8b20 60%, #ff6b00 100%);
+      color:#fff;
+      font-size:10px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .topbar{
+      flex-shrink:0;
+      min-height:84px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:14px 20px;
+      border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,0.015);
+    }
+
+    .topbar-left{ min-width:0; }
+
+    .topbar-left h2{
+      margin:0;
+      font-size:22px;
+      font-weight:900;
+      line-height:1.3;
+    }
+
+    .topbar-left p{
+      margin:5px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.8;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topbar-actions{
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .theme-toggle-btn{
+      width:38px;
+      height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#f4f6fa;
+      font-size:17px;
+      cursor:pointer;
+      transition:0.15s ease;
+      font-family:"Vazirmatn", Tahoma, Arial, sans-serif;
+    }
+
+    .theme-toggle-btn:hover{
+      background:rgba(255,122,0,0.12);
+      border-color:rgba(255,122,0,0.28);
+      transform:translateY(-1px);
+    }
+
+    .status-badge{
+      flex-shrink:0;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.07);
+      color:#eef1f6;
+      font-size:11px;
+    }
+
+    .status-badge .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 12px rgba(31,194,91,0.75);
+    }
+
+    .chat-area{
+      flex:1;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .messages{
+      flex:1;
+      min-height:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:16px 20px 10px;
+      scroll-behavior:smooth;
+    }
+
+    .message{
+      display:flex;
+      margin-bottom:12px;
+    }
+
+    .message.user{ justify-content:flex-start; }
+    .message.bot{ justify-content:flex-end; }
+
+    .bubble{
+      max-width:min(78%, 720px);
+      padding:12px 14px;
+      border-radius:16px;
+      font-size:12px;
+      line-height:1.95;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .message.user .bubble{
+      background:linear-gradient(135deg, #1b202a 0%, #151923 100%);
+      border:1px solid rgba(255,255,255,0.07);
+      border-bottom-right-radius:6px;
+      color:#fff;
+    }
+
+    .message.bot .bubble{
+      background:linear-gradient(180deg, rgba(255,122,0,0.09), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,122,0,0.15);
+      border-bottom-left-radius:6px;
+      color:#fff;
+    }
+
+    .category{
+      display:inline-block;
+      margin-top:8px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:rgba(255,122,0,0.10);
+      border:1px solid rgba(255,122,0,0.16);
+      color:#ffd8af;
+      font-size:9px;
+    }
+
+    .feedback-actions{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .feedback-label{
+      font-size:9.5px;
+      color:var(--muted);
+    }
+
+    .feedback-btn{
+      height:26px;
+      border:none;
+      border-radius:8px;
+      padding:0 9px;
+      background:rgba(255,255,255,0.06);
+      color:#f4f6fa;
+      font-size:10px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .feedback-btn:hover{
+      background:rgba(255,122,0,0.10);
+      border-color:rgba(255,122,0,0.22);
+    }
+
+    .feedback-btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .feedback-saved{
+      font-size:9.5px;
+      color:#9df3b7;
+    }
+
+    .suggestion-box{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+    }
+
+    .suggestion-title{
+      font-size:10px;
+      color:#a2a9b7;
+      line-height:1.7;
+    }
+
+    .suggestion-btn{
+      width:100%;
+      border:none;
+      border-radius:10px;
+      padding:8px 10px;
+      background:rgba(255,122,0,0.07);
+      border:1px solid rgba(255,122,0,0.18);
+      color:#ffe0c0;
+      font-size:10px;
+      line-height:1.8;
+      text-align:right;
+      cursor:pointer;
+    }
+
+    .suggestion-btn:hover{
+      background:rgba(255,122,0,0.13);
+      border-color:rgba(255,122,0,0.28);
+      color:#fff6ec;
+    }
+
+    .typing{
+      display:none;
+      flex-shrink:0;
+      padding:0 20px 8px;
+      font-size:11px;
+      color:#c1c7d1;
+    }
+
+    .input-zone{
+      flex-shrink:0;
+      padding:10px 20px 14px;
+      border-top:1px solid rgba(255,255,255,0.06);
+      background:rgba(255,255,255,0.015);
+    }
+
+    .input-box{
+      min-height:58px;
+      border-radius:16px;
+      background:#11151d;
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px;
+    }
+
+    .input-box input{
+      flex:1;
+      height:40px;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:#fff;
+      font-size:12px;
+      padding:0 10px;
+    }
+
+    .input-box input::placeholder{ color:#7b8494; }
+
+    .send-btn{
+      min-width:92px;
+      height:40px;
+      border:none;
+      border-radius:11px;
+      background:linear-gradient(135deg, var(--orange) 0%, #ff8a1f 55%, #ff6700 100%);
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .send-btn:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
+
+    .subnote{
+      margin-top:7px;
+      text-align:center;
+      font-size:10px;
+      color:var(--muted2);
+      line-height:1.7;
+    }
+
+    .modal-content{
+      width:100%;
+      max-width:430px;
+      background:#11161f;
+      color:#f4f6fa;
+      border:1px solid rgba(255,255,255,0.14);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.45);
+    }
+
+    @media (max-width: 1200px){
+      .app-shell{ grid-template-columns:minmax(0,1fr) 500px; }
+      .menu-workspace{ grid-template-columns:1fr 150px; }
+      .group-item{ min-height:48px; font-size:12px; }
+    }
+
+    @media (max-width: 980px){
+      .app-shell{
+        grid-template-columns:1fr;
+        grid-template-areas:"main";
+      }
+      .side-panel{ display:none; }
+    }
+
+    body.light-mode,
+    html.light-mode body{
+      --text:#172033;
+      --muted:#5f6878;
+      --muted2:#7a8393;
+      --border:rgba(15,23,42,0.12);
+      --border-soft:rgba(15,23,42,0.08);
+      --card:rgba(255,255,255,0.82);
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,122,0,0.26), transparent 24%),
+        radial-gradient(circle at 92% 88%, rgba(255,122,0,0.18), transparent 22%),
+        linear-gradient(135deg, #e8dfd2 0%, #f2eadf 45%, #ddd4c8 100%) !important;
+    }
+
+    body.light-mode .main,
+    html.light-mode body .main{
+      background:linear-gradient(180deg, #f2eadf 0%, #e4dbcf 100%) !important;
+    }
+
+    body.light-mode .side-panel,
+    html.light-mode body .side-panel{
+      background:
+        linear-gradient(180deg, rgba(255,122,0,0.24), rgba(255,122,0,0.06) 34%, transparent 70%),
+        linear-gradient(180deg, #eadfd2 0%, #d8cec1 100%) !important;
+      border-left:2px solid rgba(201,93,0,0.48) !important;
+    }
+
+    body.light-mode .topbar,
+    html.light-mode body .topbar{
+      background:#e9dfd2 !important;
+      border-bottom:2px solid rgba(201,93,0,0.34) !important;
+    }
+
+body.light-mode .questions-panel,
+body.light-mode .groups-panel,
+html.light-mode body .questions-panel,
+html.light-mode body .groups-panel{
+  background:#f4ece1 !important;
+  border:2px solid rgba(201,93,0,0.22) !important;
+}
+
+body.light-mode .question-chip,
+html.light-mode body .question-chip{
+  background:#fff7ed !important;
+  border:1.5px solid rgba(201,93,0,0.34) !important;
+  color:#4b2a08 !important;
+}
+
+body.light-mode .question-chip:hover,
+html.light-mode body .question-chip:hover{
+  background:#ffe9d1 !important;
+  border-color:rgba(201,93,0,0.54) !important;
+  color:#2f1a05 !important;
+}
+
+body.light-mode .group-item,
+html.light-mode body .group-item{
+  background:#fffaf5 !important;
+  border:1.5px solid rgba(201,93,0,0.24) !important;
+  color:#1f2937 !important;
+}
+
+body.light-mode .group-item:hover,
+html.light-mode body .group-item:hover{
+  background:#fff0dc !important;
+  border-color:rgba(201,93,0,0.44) !important;
+  color:#5c2b00 !important;
+}
+
+body.light-mode .group-item.active,
+html.light-mode body .group-item.active{
+  background:linear-gradient(135deg, rgba(255,122,0,0.28), rgba(255,122,0,0.12)) !important;
+  border:2px solid rgba(201,93,0,0.60) !important;
+  color:#4d2400 !important;
+}
+    body.light-mode .question-chip,
+    body.light-mode .suggestion-btn,
+    html.light-mode body .question-chip,
+    html.light-mode body .suggestion-btn{
+      background:rgba(255,122,0,0.18) !important;
+      border:1.5px solid rgba(201,93,0,0.46) !important;
+      color:#522700 !important;
+    }
+
+    body.light-mode .question-chip:hover,
+    body.light-mode .suggestion-btn:hover,
+    html.light-mode body .question-chip:hover,
+    html.light-mode body .suggestion-btn:hover{
+      background:rgba(255,122,0,0.28) !important;
+      border-color:rgba(201,93,0,0.68) !important;
+      color:#351900 !important;
+    }
+
+    body.light-mode .message.bot .bubble,
+    html.light-mode body .message.bot .bubble{
+      background:linear-gradient(180deg, #fff0dc 0%, #f7eadb 100%) !important;
+      border:2px solid rgba(201,93,0,0.46) !important;
+      color:#111827 !important;
+    }
+
+    body.light-mode .message.user .bubble,
+    html.light-mode body .message.user .bubble{
+      background:linear-gradient(135deg, #f8f1e7 0%, #fffaf4 100%) !important;
+      border:1.5px solid rgba(88,94,110,0.28) !important;
+      color:#111827 !important;
+    }
+
+    body.light-mode .message.user .bubble *,
+    body.light-mode .message.bot .bubble *,
+    html.light-mode body .message.user .bubble *,
+    html.light-mode body .message.bot .bubble *{
+      color:inherit !important;
+    }
+
+    body.light-mode .category,
+    html.light-mode body .category{
+      color:#8a4300 !important;
+      background:rgba(255,122,0,0.12) !important;
+      border-color:rgba(255,122,0,0.24) !important;
+    }
+
+    body.light-mode .feedback-btn,
+    html.light-mode body .feedback-btn{
+      color:#111827 !important;
+      background:rgba(15,23,42,0.04) !important;
+      border-color:rgba(15,23,42,0.14) !important;
+    }
+
+    body.light-mode .feedback-saved,
+    html.light-mode body .feedback-saved{
+      color:#15803d !important;
+    }
+
+    body.light-mode .input-zone,
+    html.light-mode body .input-zone{
+      background:#e5dbce !important;
+      border-top:2px solid rgba(201,93,0,0.34) !important;
+    }
+
+    body.light-mode .input-box,
+    html.light-mode body .input-box{
+      background:#fff7ed !important;
+      border:1.5px solid rgba(201,93,0,0.36) !important;
+    }
+
+    body.light-mode .input-box input,
+    html.light-mode body .input-box input{
+      color:#172033 !important;
+    }
+
+    body.light-mode .input-box input::placeholder,
+    html.light-mode body .input-box input::placeholder{
+      color:#8a94a6 !important;
+    }
+
+    body.light-mode .status-badge,
+    html.light-mode body .status-badge{
+      background:#fff7ed !important;
+      border:1.5px solid rgba(31,194,91,0.34) !important;
+      color:#172033 !important;
+    }
+
+    body.light-mode .theme-toggle-btn,
+    html.light-mode body .theme-toggle-btn{
+      background:rgba(255,122,0,0.20) !important;
+      border:1.5px solid rgba(201,93,0,0.52) !important;
+      color:#172033 !important;
+    }
+
+    body.light-mode .admin-report-btn,
+    html.light-mode body .admin-report-btn{
+      background:#fff7ed !important;
+      border:1.5px solid rgba(201,93,0,0.32) !important;
+      color:#5c2b00 !important;
+    }
+
+.chat-link{
+  display:inline;
+  margin:0;
+  padding:0;
+  border-radius:0;
+  background:transparent !important;
+  color:#ffd39b !important;
+  text-decoration:underline;
+  font-weight:700;
+  word-break:break-all;
+}
+
+.chat-link:hover{
+  color:#ffffff !important;
+  background:transparent !important;
+  filter:none !important;
+}
+  .topic-chip{
+  width:100%;
+  min-height:46px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.045);
+  color:#f4f6fa;
+  font-family:Tahoma, Arial, sans-serif;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.8;
+  text-align:right;
+  direction:rtl;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  transition:0.15s ease;
+}
+
+.topic-chip:hover{
+  background:rgba(255,122,0,0.13);
+  border-color:rgba(255,122,0,0.35);
+  color:#fff3e6;
+  transform:translateY(-1px);
+}
+
+body.light-mode .topic-chip,
+html.light-mode body .topic-chip{
+  background:#ffffff !important;
+  border:1.5px solid rgba(201,93,0,0.20) !important;
+  color:#1f2937 !important;
+  box-shadow:0 6px 16px rgba(15,23,42,0.06);
+}
+
+body.light-mode .topic-chip:hover,
+html.light-mode body .topic-chip:hover{
+  background:#fff7ed !important;
+  border-color:rgba(255,122,0,0.45) !important;
+  color:#5c2b00 !important;
+}
+
+body.light-mode .topic-chip{
+  background:#fff7ed !important;
+  border:1.5px solid rgba(201,93,0,0.28) !important;
+  color:#1f2937 !important;
+}
+
+body.light-mode .back-topic-btn{
+  background:rgba(255,122,0,0.20) !important;
+  color:#5c2b00 !important;
+}
+
+.sidebar-footer{
+  width:100%;
+  margin-top:auto;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:stretch;
+}
+body.light-mode .sidebar-footer,
+html.light-mode body .sidebar-footer{
+  border-top:1px solid rgba(201,93,0,0.16) !important;
+}
+
+body.light-mode .admin-report-btn,
+html.light-mode body .admin-report-btn{
+  background:#fffaf5 !important;
+  border:1.5px solid rgba(201,93,0,0.22) !important;
+  color:#1f2937 !important;
+  box-shadow:0 6px 16px rgba(15,23,42,0.05);
+}
+
+body.light-mode .admin-report-btn:hover,
+html.light-mode body .admin-report-btn:hover{
+  background:#fff0dc !important;
+  border-color:rgba(201,93,0,0.45) !important;
+  color:#5c2b00 !important;
+}
+
+body.light-mode .alert-report-btn,
+html.light-mode body .alert-report-btn{
+  background:#fff5f3 !important;
+  border-color:rgba(220,38,38,0.25) !important;
+}
+
+body.light-mode .alert-report-btn:hover,
+html.light-mode body .alert-report-btn:hover{
+  background:#ffe7e3 !important;
+  border-color:rgba(220,38,38,0.45) !important;
+}
+
+body.light-mode .logout-btn,
+html.light-mode body .logout-btn{
+  background:linear-gradient(135deg, #ff7a00, #ff9a2e) !important;
+  color:#ffffff !important;
+}
+
+
+
+.admin-report-btn:hover{
+  background:rgba(255,122,0,0.12);
+  border-color:rgba(255,122,0,0.34);
+  color:#fff3e6 !important;
+  transform:translateY(-1px);
+}
+
+.admin-report-btn::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#ff7a00;
+  box-shadow:0 0 10px rgba(255,122,0,0.65);
+  flex-shrink:0;
+}
+
+.alert-report-btn{
+  background:rgba(255,70,50,0.08) !important;
+  border-color:rgba(255,70,50,0.22) !important;
+}
+
+.alert-report-btn:hover{
+  background:rgba(255,70,50,0.14) !important;
+  border-color:rgba(255,70,50,0.40) !important;
+}
+
+.alert-report-btn::before{
+  background:#ff453a;
+  box-shadow:0 0 10px rgba(255,69,58,0.65);
+}
+
+.logout-btn:hover{
+  filter:brightness(1.07);
+  transform:translateY(-1px);
+}
+.sidebar-footer a{
+  text-decoration:none !important;
+}
+
+.sidebar-footer a:visited,
+.sidebar-footer a:link{
+  color:inherit !important;
+}
+
+.admin-report-btn,
+.admin-report-btn:visited,
+.admin-report-btn:link{
+  width:100%;
+  min-height:40px;
+  box-sizing:border-box;
+  border-radius:12px;
+  text-decoration:none !important;
+  font-family:Tahoma, Arial, sans-serif;
+  font-size:12px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.055);
+  color:#f5f7fb !important;
+}
+
+.alert-report-btn,
+.alert-report-btn:visited,
+.alert-report-btn:link{
+  background:rgba(255,80,70,0.08) !important;
+  border-color:rgba(255,80,70,0.28) !important;
+  color:#f5f7fb !important;
+}
+
+.logout-btn,
+.logout-btn:visited,
+.logout-btn:link{
+  width:100%;
+  min-height:40px;
+  border-radius:12px;
+  background:#ff7a00 !important;
+  color:#ffffff !important;
+  text-decoration:none !important;
+  font-family:Tahoma, Arial, sans-serif;
+  font-size:12px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.admin-action-links{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:6px !important;
+  justify-content:center !important;
+  align-items:center !important;
+  width:100% !important;
+}
+
+.admin-report-btn,
+.admin-report-btn:link,
+.admin-report-btn:visited,
+.alert-report-btn,
+.alert-report-btn:link,
+.alert-report-btn:visited{
+  width:auto !important;
+  min-width:86px !important;
+  max-width:120px !important;
+  min-height:28px !important;
+  height:28px !important;
+  padding:0 9px !important;
+  border-radius:8px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  text-decoration:none !important;
+  box-shadow:none !important;
+}
+
+.admin-report-btn::before,
+.alert-report-btn::before{
+  display:none !important;
+  content:none !important;
+}
+
+.logout-btn,
+.logout-btn:link,
+.logout-btn:visited{
+  width:150px !important;
+  min-height:30px !important;
+  height:30px !important;
+  margin:0 auto !important;
+  padding:0 12px !important;
+  border-radius:9px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+.admin-action-links{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+  align-items:center !important;
+}
+
+.admin-report-btn,
+.admin-report-btn:link,
+.admin-report-btn:visited,
+.alert-report-btn,
+.alert-report-btn:link,
+.alert-report-btn:visited{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none !important;
+  height:36px !important;
+  min-height:36px !important;
+  padding:0 10px !important;
+  border-radius:10px !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  line-height:1.4 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  text-decoration:none !important;
+  box-shadow:none !important;
+  white-space:nowrap !important;
+}
+
+.admin-report-btn::before,
+.alert-report-btn::before{
+  display:none !important;
+  content:none !important;
+}
+
+.logout-btn,
+.logout-btn:link,
+.logout-btn:visited{
+  width:170px !important;
+  height:34px !important;
+  min-height:34px !important;
+  margin:0 auto !important;
+  padding:0 12px !important;
+  border-radius:10px !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+}
+  </style>
+
+  {% include "_theme_support.html" %}
+  
+</head>
+
+<body>
+  <div class="app-shell">
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>دستیار هوشمند مدریک</h2>
+          <p>سؤال خود را بنویسید یا از سؤال‌های پرتکرار مدیریت سیستم مدریک استفاده کنید.</p>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="themeToggleBtn" class="theme-toggle-btn" type="button" title="تغییر حالت نمایش">🌙</button>
+
+          <div class="status-badge">
+            <span class="dot"></span>
+            <span>سامانه فعال</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="chat-area">
+        <div class="messages" id="chatMessages">
+          <div class="message bot">
+            <div class="bubble">سلام. من دستیار هوشمند مدریک هستم.
+از دسته‌های سمت راست، سؤال‌های پرتکرار مدیریت سیستم مدریک را انتخاب کنید یا سؤال خود را مستقیم بنویسید.</div>
+          </div>
+        </div>
+
+        <div class="typing" id="typing">در حال بررسی سؤال...</div>
+
+        <div class="input-zone">
+          <div class="input-box">
+            <input id="questionInput" type="text" placeholder="سؤال خود را اینجا بنویسید..." autocomplete="off">
+            <button id="sendBtn" class="send-btn" type="button">ارسال</button>
+          </div>
+          <div class="subnote">برای پاسخ دقیق‌تر، سؤال را کامل و واضح بنویسید.</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="side-panel">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <h1>مدریک</h1>
+          <p>سؤال‌های پرتکرار مدیریت سیستم</p>
+        </div>
+      </div>
+
+      <div class="menu-workspace">
+        <section class="questions-panel">
+          <div class="question-header">
+            <h3 id="questionTitle">ورود و تنظیمات</h3>
+            <p>برای ارسال مستقیم، روی هر سؤال کلیک کنید.</p>
+          </div>
+          <div class="question-list" id="questionList"></div>
+        </section>
+
+        <section class="groups-panel" id="groupsPanel"></section>
+      </div>
+
+      <div class="sidebar-footer">
+        {% if session.get("role") in ["admin", "support_manager", "مدیر سیستم", "مدیر پشتیبانی"] %}
+          <div class="admin-action-links">
+            <a class="admin-report-btn" href="{{ url_for('feedback_report') }}">
+              گزارش بازخوردها
+            </a>
+
+            <a class="admin-report-btn alert-report-btn" href="{{ url_for('admin_chat_alerts') }}">
+              آلارم‌های چت
+            </a>
+          </div>
+        {% endif %}
+
+        <a class="logout-btn" href="{{ url_for('logout') }}">
+          خروج از حساب
+        </a>
+
+        <div class="mini-note">خروج مستقیم شما را به صفحه ورود برمی‌گرداند.</div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="notUsefulModal" style="display:none; position:fixed; inset:0; z-index:999999; direction:rtl; font-family:Tahoma, Arial, sans-serif;">
+    <div id="notUsefulModalBg" style="width:100%; height:100%; background:rgba(0,0,0,0.68); display:flex; align-items:center; justify-content:center; padding:16px;">
+      <div class="modal-content">
+        <h3 style="margin:0 0 10px; font-size:17px; font-weight:900;">دلیل مفید نبودن پاسخ</h3>
+
+        <p style="margin:0 0 14px; color:#a2a9b7; font-size:12px; line-height:1.9;">
+          لطفاً مشخص کنید چرا این پاسخ برای شما مفید نبود.
+        </p>
+
+        <label style="display:block; margin:10px 0 6px; color:#a2a9b7; font-size:12px; font-weight:800;">دلیل</label>
+
+        <select id="notUsefulReason" style="width:100%; height:40px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#0f141d; color:#f4f6fa; padding:0 10px; font-family:Tahoma, Arial, sans-serif; font-size:12px;">
+          <option value="wrong_answer">پاسخ اشتباه بود</option>
+          <option value="incomplete_answer">پاسخ کامل نبود</option>
+          <option value="misunderstood_question">سؤال را درست متوجه نشد</option>
+          <option value="wrong_path">مسیر گفته‌شده در نرم‌افزار درست نبود</option>
+          <option value="other">سایر موارد</option>
+        </select>
+
+        <label style="display:block; margin:10px 0 6px; color:#a2a9b7; font-size:12px; font-weight:800;">توضیح اختیاری</label>
+
+        <textarea id="notUsefulComment" style="width:100%; min-height:90px; resize:vertical; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#0f141d; color:#f4f6fa; padding:10px; font-family:Tahoma, Arial, sans-serif; font-size:12px; line-height:1.8;" placeholder="اگر لازم است توضیح بیشتری بنویسید..."></textarea>
+
+        <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
+          <button type="button" id="submitNotUsefulFeedback" style="border:none; border-radius:10px; min-height:36px; padding:8px 14px; background:linear-gradient(135deg,#ff7a00,#ff9a3d); color:#fff; font-weight:800; cursor:pointer; font-family:Tahoma, Arial, sans-serif;">ثبت بازخورد</button>
+
+          <button type="button" id="closeNotUsefulModal" style="border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-height:36px; padding:8px 14px; background:rgba(255,255,255,0.08); color:#fff; font-weight:800; cursor:pointer; font-family:Tahoma, Arial, sans-serif;">انصراف</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+const questionGroups = {
+  accounting: {
+    label: "حسابداری",
+    topics: [
+      {
+        label: "اسناد حسابداری",
+        questions: [
+          "چطور سند حسابداری ثبت کنم؟",
+          "چرا نمی‌توان مستقیم روی حساب کل سند حسابداری ثبت کرد؟",
+          "حساب معین چه کاربردی دارد؟",
+          "تفصیل ۱، ۲ و ۳ چه کاربردی دارند؟",
+          "گزارش اطلاعات فاقد سند حسابداری چه کاربردی دارد؟"
+        ]
+      },
+      {
+        label: "بستن حساب‌ها و سال مالی",
+        questions: [
+          "چطور حساب‌های درآمد و هزینه را ببندیم؟",
+          "چطور سند اختتامیه صادر کنیم؟",
+          "چطور سند افتتاحیه مکانیزه ایجاد کنیم؟"
+        ]
+      },
+      {
+        label: "سامانه مؤدیان و مالیات",
+        questions: [
+          "شناسه یکتای حافظه مالیاتی چیست و چه کاربردی دارد؟",
+          "ارسال اطلاعات به سامانه مؤدیان از کجا انجام می‌شود؟",
+          "اگر صورتحساب در سامانه مؤدیان ارسال نشود چه باید کرد؟",
+          "مالیات بر ارزش افزوده در سیستم چگونه ثبت می‌شود؟"
+        ]
+      }
+    ]
+  },
+
+  system_management: {
+    label: "مدیریت سیستم",
+    topics: [
+      {
+        label: "شرکت و گروه شرکت‌ها",
+        questions: [
+          "چگونه یک شرکت جدید در مدریک تعریف کنیم؟",
+          "در زمان تعریف شرکت چه اطلاعاتی باید ثبت شود؟",
+          "چه زمانی تکمیل دقیق و کامل مشخصات شرکت ضروری است؟",
+          "گروه‌بندی شرکت‌ها چه کاربردی دارد؟",
+          "آیا یک شرکت می‌تواند هم‌زمان عضو چند گروه شرکت باشد؟",
+          "گزارش تجمیعی گروه شرکت‌ها چگونه تهیه می‌شود؟"
+        ]
+      },
+      {
+        label: "سال مالی",
+        questions: [
+          "چگونه سال مالی جدید در مدریک ایجاد کنیم؟",
+          "برای تعریف سال مالی چه اطلاعاتی باید وارد شود؟",
+          "چرا سال مالی جدید پس از ایجاد در فهرست نمایش داده نمی‌شود؟",
+          "آیا سال مالی جدید برای همه کاربران قابل مشاهده است؟",
+          "چگونه سال مالی فعال را تغییر دهیم؟"
+        ]
+      },
+      {
+        label: "کاربران و دسترسی‌ها",
+        questions: [
+          "چگونه یک کاربر جدید در مدریک تعریف کنیم؟",
+          "چگونه یک سطح دسترسی پایه به کاربر اختصاص دهیم؟",
+          "آیا می‌توان هم‌زمان چند نقش پایه به یک کاربر داد؟",
+          "چگونه یک نقش یا سطح دسترسی جدید ایجاد کنیم؟",
+          "آیا دسترسی‌های یک کاربر پس از انتخاب نقش قابل شخصی‌سازی است؟",
+          "آیا یک کاربر می‌تواند به چند شرکت یا چند سال مالی دسترسی داشته باشد؟"
+        ]
+      },
+      {
+        label: "مراحل تأیید اسناد",
+        questions: [
+          "تعریف مراحل اسناد در مدریک چه کاربردی دارد؟",
+          "آیا برای هر نوع سند می‌توان مراحل متفاوتی تعریف کرد؟",
+          "آیا مراحل تأیید سند باید به‌ترتیب انجام شوند؟",
+          "سند زیرسیستم چه زمانی قابل ارسال به حسابداری است؟",
+          "پس از تأیید مدیر، آیا ثبت‌کننده می‌تواند سند را اصلاح کند؟",
+          "تأیید مرحله‌ای سند با تأیید نهایی اسناد چه تفاوتی دارد؟"
+        ]
+      }
+    ]
+  }
+};
+
+let activeKey = "accounting";
+      let pendingNotUsefulFeedback = null;
+      let lastUserQuestion = "";
+
+      const input = document.getElementById("questionInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const typing = document.getElementById("typing");
+      const chatMessages = document.getElementById("chatMessages");
+      const groupsPanel = document.getElementById("groupsPanel");
+      const questionTitle = document.getElementById("questionTitle");
+      const questionList = document.getElementById("questionList");
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+      const notUsefulModal = document.getElementById("notUsefulModal");
+      const notUsefulReason = document.getElementById("notUsefulReason");
+      const notUsefulComment = document.getElementById("notUsefulComment");
+      const submitNotUsefulFeedback = document.getElementById("submitNotUsefulFeedback");
+      const closeNotUsefulModalBtn = document.getElementById("closeNotUsefulModal");
+      const notUsefulModalBg = document.getElementById("notUsefulModalBg");
+
+      function applyTheme(theme) {
+        const isLight = theme === "light";
+        document.documentElement.classList.toggle("light-mode", isLight);
+        document.body.classList.toggle("light-mode", isLight);
+
+        if (themeToggleBtn) {
+          themeToggleBtn.textContent = isLight ? "☀️" : "🌙";
+          themeToggleBtn.title = isLight ? "تغییر به حالت تیره" : "تغییر به حالت روشن";
+        }
+
+        localStorage.setItem("medrik_theme", theme);
+      }
+
+      const savedTheme = localStorage.getItem("medrik_theme") || "dark";
+      applyTheme(savedTheme);
+
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", function () {
+          const currentTheme = document.body.classList.contains("light-mode") ? "light" : "dark";
+          const nextTheme = currentTheme === "light" ? "dark" : "light";
+          applyTheme(nextTheme);
+        });
+      }
+
+      function setLoading(isLoading) {
+        sendBtn.disabled = isLoading;
+        document.querySelectorAll(".group-item").forEach(btn => btn.disabled = isLoading);
+        document.querySelectorAll(".question-chip").forEach(btn => btn.disabled = isLoading);
+        typing.style.display = isLoading ? "block" : "none";
+        if (!isLoading) typing.textContent = "در حال بررسی سؤال...";
+        sendBtn.textContent = isLoading ? "در حال ارسال..." : "ارسال";
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function runThinkingSteps() {
+        
+        const steps = [
+          "در حال بررسی سؤال...",
+          "جستجو در پایگاه دانش مدریک...",
+          "تطبیق با سؤال‌های مشابه...",
+          "آماده‌سازی پاسخ..."
+        ];
+
+        for (const step of steps) {
+          typing.textContent = step;
+          await sleep(650);
+        }
+      }
+      function escapeHtml(text){
+  return String(text || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function linkifyText(text){
+  const safeText = escapeHtml(text);
+
+  return safeText
+    .replace(
+      /(https?:\/\/[^\s<]+)/g,
+      function(url){
+        const cleanUrl = url.trim();
+
+        return '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-flex !important; align-items:center !important; justify-content:center !important; min-height:28px !important; padding:4px 10px !important; margin:4px 0 !important; border-radius:8px !important; background:rgba(255,122,0,0.14) !important; border:1px solid rgba(255,122,0,0.28) !important; color:#ffd39b !important; text-decoration:none !important; font-weight:900 !important; font-size:11px !important;">مشاهده ویدیو</a>';
+      }
+    )
+    .replaceAll("\n", "<br>");
+}
+
+      function addMessage(text, sender, category = "", sourceQuestion = "") {
+        text = String(text || "").trim();
+        if (!text) {
+          text = "پاسخی برای نمایش دریافت نشد. لطفاً دوباره سؤال را ارسال کنید یا موضوع را برای بررسی پشتیبانی ثبت کنید.";
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${sender}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+      bubble.innerHTML = linkifyText(text);
+        if (category && category !== "عمومی") {
+          const cat = document.createElement("div");
+          cat.className = "category";
+          cat.textContent = `دسته: ${category}`;
+          bubble.appendChild(document.createElement("br"));
+          bubble.appendChild(cat);
+        }
+
+        if (sender === "bot" && sourceQuestion) {
+          const feedbackBox = document.createElement("div");
+          feedbackBox.className = "feedback-actions";
+
+          const label = document.createElement("span");
+          label.className = "feedback-label";
+          label.textContent = "آیا این پاسخ مفید بود؟";
+
+          const usefulBtn = document.createElement("button");
+          usefulBtn.type = "button";
+          usefulBtn.className = "feedback-btn";
+          usefulBtn.textContent = "👍 مفید بود";
+
+          const notUsefulBtn = document.createElement("button");
+          notUsefulBtn.type = "button";
+          notUsefulBtn.className = "feedback-btn";
+          notUsefulBtn.textContent = "👎 مفید نبود";
+
+          const savedText = document.createElement("span");
+          savedText.className = "feedback-saved";
+          savedText.style.display = "none";
+          savedText.textContent = "ثبت شد";
+
+          usefulBtn.addEventListener("click", function () {
+            sendFeedback({
+              question: sourceQuestion,
+              answer: text,
+              category: category,
+              rating: "useful",
+              buttons: [usefulBtn, notUsefulBtn],
+              savedText: savedText
+            });
+          });
+
+          notUsefulBtn.addEventListener("click", function () {
+            openNotUsefulModal(sourceQuestion, text, category || "");
+          });
+
+          feedbackBox.appendChild(label);
+          feedbackBox.appendChild(usefulBtn);
+          feedbackBox.appendChild(notUsefulBtn);
+          feedbackBox.appendChild(savedText);
+          bubble.appendChild(feedbackBox);
+        }
+
+        wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addSuggestionBox(suggestions) {
+        if (!Array.isArray(suggestions) || suggestions.length === 0) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "message bot";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        const box = document.createElement("div");
+        box.className = "suggestion-box";
+
+        const title = document.createElement("div");
+        title.className = "suggestion-title";
+        title.textContent = "سؤال‌های مرتبط پیشنهادی:";
+        box.appendChild(title);
+
+        suggestions.forEach(function (suggestedQuestion) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "suggestion-btn";
+          btn.textContent = String(suggestedQuestion || "").trim();
+         btn.addEventListener("click", function () {
+  const clickedQuestion = String(btn.textContent || "").trim();
+  sendQuestion(clickedQuestion);
+});
+          box.appendChild(btn);
+        });
+
+        bubble.appendChild(box);
+        wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      async function sendFeedback({ question, answer, category, rating, buttons = [], savedText = null, reason = "", comment = "" }) {
+        buttons.forEach(btn => btn.disabled = true);
+
+        try {
+          const response = await fetch("/feedback", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+              question: question || "-",
+              answer: answer || "-",
+              category: category || "",
+              rating: rating || "",
+              reason: reason || "",
+              comment: comment || ""
+            })
+          });
+
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return false;
+          }
+
+          if (response.ok) {
+            if (savedText) {
+              savedText.style.display = "inline";
+              savedText.textContent = "ثبت شد";
+              savedText.style.color = "#9df3b7";
+            }
+            return true;
+          }
+
+          buttons.forEach(btn => btn.disabled = false);
+          if (savedText) {
+            savedText.style.display = "inline";
+            savedText.textContent = "ثبت نشد";
+            savedText.style.color = "#ffb7b7";
+          }
+          return false;
+        } catch (error) {
+          console.error("FEEDBACK ERROR:", error);
+          buttons.forEach(btn => btn.disabled = false);
+          if (savedText) {
+            savedText.style.display = "inline";
+            savedText.textContent = "خطا در ثبت";
+            savedText.style.color = "#ffb7b7";
+          }
+          return false;
+        }
+      }
+      
+
+      function openNotUsefulModal(question, answer, category) {
+        pendingNotUsefulFeedback = {
+          question: question || lastUserQuestion || "-",
+          answer: answer || "-",
+          category: category || ""
+        };
+        notUsefulReason.value = "wrong_answer";
+        notUsefulComment.value = "";
+        notUsefulModal.style.display = "block";
+      }
+
+      function closeNotUsefulModal() {
+        notUsefulModal.style.display = "none";
+        pendingNotUsefulFeedback = null;
+      }
+
+      closeNotUsefulModalBtn.addEventListener("click", closeNotUsefulModal);
+
+      notUsefulModalBg.addEventListener("click", function(event) {
+        if (event.target.id === "notUsefulModalBg") closeNotUsefulModal();
+      });
+
+      submitNotUsefulFeedback.addEventListener("click", async function() {
+        if (!pendingNotUsefulFeedback) {
+          closeNotUsefulModal();
+          return;
+        }
+
+        submitNotUsefulFeedback.disabled = true;
+        submitNotUsefulFeedback.innerText = "در حال ثبت...";
+
+        const ok = await sendFeedback({
+          question: pendingNotUsefulFeedback.question,
+          answer: pendingNotUsefulFeedback.answer,
+          category: pendingNotUsefulFeedback.category,
+          rating: "not_useful",
+          reason: notUsefulReason.value || "other",
+          comment: notUsefulComment.value.trim()
+        });
+
+        submitNotUsefulFeedback.disabled = false;
+        submitNotUsefulFeedback.innerText = "ثبت بازخورد";
+
+        if (ok) {
+          closeNotUsefulModal();
+          addMessage("بازخورد شما ثبت شد. این پاسخ برای بررسی و بهبود پایگاه دانش علامت‌گذاری شد.", "bot", "بازخورد");
+        } else {
+          alert("ثبت بازخورد انجام نشد. لطفاً دوباره تلاش کنید.");
+        }
+      });
+
+      document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") closeNotUsefulModal();
+      });
+function renderQuestions(key) {
+  const group = questionGroups[key];
+  if (!group) return;
+
+  activeKey = key;
+  questionTitle.textContent = group.label;
+  questionList.innerHTML = "";
+
+  document.querySelectorAll(".group-item").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.key === key);
+  });
+
+  if (Array.isArray(group.topics)) {
+    const hint = document.createElement("div");
+    hint.className = "suggestion-title";
+    hint.textContent = "ابتدا موضوع موردنظر را انتخاب کنید:";
+    questionList.appendChild(hint);
+
+    group.topics.forEach((topic, topicIndex) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "topic-chip";
+      btn.textContent = topic.label;
+
+      // مهم: موضوع نباید به سرور ارسال شود.
+      // فقط باید سؤال‌های داخل همان موضوع را نشان بدهد.
+      btn.addEventListener("click", function () {
+        renderTopicQuestions(key, topicIndex);
+      });
+
+      questionList.appendChild(btn);
+    });
+
+    return;
+  }
+
+  if (Array.isArray(group.questions)) {
+    group.questions.forEach((question) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "question-chip";
+      btn.textContent = question;
+
+      btn.addEventListener("click", function () {
+        const clickedQuestion = String(btn.textContent || "").trim();
+        console.log("READY QUESTION CLICKED:", clickedQuestion);
+        sendQuestion(clickedQuestion);
+      });
+
+      questionList.appendChild(btn);
+    });
+  }
+}
+
+
+function renderTopicQuestions(groupKey, topicIndex) {
+  const group = questionGroups[groupKey];
+  if (!group || !Array.isArray(group.topics)) return;
+
+  const topic = group.topics[topicIndex];
+  if (!topic) return;
+
+  questionTitle.textContent = group.label + " / " + topic.label;
+  questionList.innerHTML = "";
+
+  const backBtn = document.createElement("button");
+  backBtn.type = "button";
+  backBtn.className = "back-topic-btn";
+  backBtn.textContent = "بازگشت به موضوع‌ها";
+
+  backBtn.addEventListener("click", function () {
+    renderQuestions(groupKey);
+  });
+
+  questionList.appendChild(backBtn);
+
+  if (!Array.isArray(topic.questions)) return;
+
+  topic.questions.forEach((question) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "question-chip";
+    btn.textContent = question;
+
+    // مهم: فقط اینجا سؤال واقعی به سرور ارسال می‌شود.
+    btn.addEventListener("click", function () {
+      const clickedQuestion = String(btn.textContent || "").trim();
+      console.log("READY QUESTION CLICKED:", clickedQuestion);
+      sendQuestion(clickedQuestion);
+    });
+
+    questionList.appendChild(btn);
+  });
+}
+
+      function renderGroups() {
+        groupsPanel.innerHTML = "";
+
+        Object.entries(questionGroups).forEach(([key, group]) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "group-item";
+          btn.dataset.key = key;
+          btn.textContent = group.label;
+
+          btn.addEventListener("mouseenter", function () {
+            if (!sendBtn.disabled) renderQuestions(key);
+          });
+
+          btn.addEventListener("click", function () {
+            renderQuestions(key);
+          });
+
+          groupsPanel.appendChild(btn);
+        });
+      }
+
+      async function sendQuestion(prefilledQuestion = null) {
+  let question = "";
+
+  if (typeof prefilledQuestion === "string") {
+    question = prefilledQuestion.trim();
+  } else {
+    question = String(input.value || "").trim();
+  }
+
+  console.log("QUESTION SENT TO SERVER:", question);
+
+  if (!question) return;
+
+  lastUserQuestion = question;
+  addMessage(question, "user");
+  input.value = "";
+  setLoading(true);
+
+        try {
+          await runThinkingSteps();
+
+          const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ question: question })
+          });
+
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return;
+          }
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("ASK HTTP ERROR:", response.status, errorText);
+            addMessage(
+              `خطای سرور دریافت شد. کد خطا: ${response.status}\nلطفاً پنجره ترمینال Flask را بررسی کنید.`,
+              "bot",
+              "خطای سرور",
+              question
+            );
+            return;
+          }
+
+          let data = null;
+          try {
+            data = await response.json();
+          } catch (jsonError) {
+            console.error("ASK JSON ERROR:", jsonError);
+            addMessage(
+              "سرور پاسخ داد، اما فرمت پاسخ JSON نبود. احتمالاً در app.py خطا یا redirect اتفاق افتاده است.",
+              "bot",
+              "خطای پاسخ",
+              question
+            );
+            return;
+          }
+
+          console.log("ASK RESPONSE:", data);
+
+          const answers = Array.isArray(data.answers)
+            ? data.answers.map(item => String(item || "").trim()).filter(item => item.length > 0)
+            : [];
+
+          if (answers.length > 0) {
+            answers.forEach((ans, i) => {
+              const category = Array.isArray(data.categories) ? (data.categories[i] || "") : "";
+              addMessage(ans, "bot", category, question);
+            });
+          } else {
+            addMessage(
+              "پاسخی برای نمایش دریافت نشد. این سؤال برای بررسی پشتیبانی ثبت شد.",
+              "bot",
+              "نیازمند بررسی پشتیبانی",
+              question
+            );
+          }
+
+          if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+            addSuggestionBox(data.suggestions);
+          }
+
+        } catch (error) {
+          console.error("ASK FETCH ERROR:", error);
+          addMessage(
+            "ارتباط با سرور برقرار نشد. مطمئن شوید Flask در حال اجراست و صفحه را با آدرس http://127.0.0.1:5000 باز کرده‌اید.",
+            "bot",
+            "خطای ارتباط",
+            question
+          );
+        } finally {
+          setLoading(false);
+          input.focus();
+        }
+      }
+
+      sendBtn.addEventListener("click", function () {
+        sendQuestion();
+      });
+
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          sendQuestion();
+        }
+      });
+
+      renderGroups();
+      renderQuestions(activeKey);
+      input.focus();
+    });
+    
+    
+    
+    
+  </script>
+</body>
+</html>
