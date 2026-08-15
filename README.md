@@ -1,3 +1,4 @@
+<img width="1512" height="949" alt="Screenshot 2026-08-15 at 9 27 07 PM" src="https://github.com/user-attachments/assets/184ed0d4-0875-401b-aae6-e2ebd6e52646" />
 Medrik-Support-Assistant
 │
 ├── README.md
