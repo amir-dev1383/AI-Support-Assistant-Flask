@@ -2,6 +2,7 @@ import os
 import re
 import json
 from datetime import datetime, timedelta, timezone
+from ai_engine import ai_engine 
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -11,6 +12,7 @@ from flask import Flask, flash, g, jsonify, redirect, render_template, request, 
 from rapidfuzz import fuzz
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
+from faq_vector_engine import FAQVectorEngine
 
 from accounting_qa_data import accounting_qa_data, greetings, quick_replies
 
@@ -419,6 +421,7 @@ def make_sqlserver_engine():
 
 
 engine = make_sqlserver_engine()
+faq_vector_engine = FAQVectorEngine(engine)
 
 
 def utc_now() -> datetime:
@@ -597,6 +600,7 @@ def init_db() -> None:
         conn.execute(
             text(
                 """
+                
                 IF OBJECT_ID(N'dbo.unanswered_questions', N'U') IS NULL
                 BEGIN
                     CREATE TABLE dbo.unanswered_questions (
@@ -611,10 +615,34 @@ def init_db() -> None:
                         CONSTRAINT FK_unanswered_questions_users
                             FOREIGN KEY (user_id) REFERENCES dbo.users(id)
                     );
+                    
                 END
                 """
             )
         )
+        conn.execute(
+    text(
+        """
+        IF COL_LENGTH('dbo.unanswered_questions', 'matched_faq_id') IS NULL
+        BEGIN
+            ALTER TABLE dbo.unanswered_questions
+            ADD matched_faq_id INT NULL;
+        END
+
+        IF COL_LENGTH('dbo.unanswered_questions', 'matched_question') IS NULL
+        BEGIN
+            ALTER TABLE dbo.unanswered_questions
+            ADD matched_question NVARCHAR(MAX) NULL;
+        END
+
+        IF COL_LENGTH('dbo.unanswered_questions', 'vector_score') IS NULL
+        BEGIN
+            ALTER TABLE dbo.unanswered_questions
+            ADD vector_score FLOAT NULL;
+        END
+        """
+    )
+)
 
         conn.execute(
             text(
@@ -1735,6 +1763,7 @@ def root():
 def login():
     if request.method == "POST":
         data = extract_request_data()
+        
 
         username = str(data.get("username", "")).strip()
         password = str(data.get("password", "")).strip()
@@ -1885,10 +1914,51 @@ def build_fallback_support_answer(raw_question: str, suggestions=None) -> str:
     return "\n".join(lines).strip()
 @app.route("/ask", methods=["POST"])
 @login_required_api
+
 def ask():
+    
+    data = extract_request_data()
+    raw_question = str(data.get("question", "")).strip()
+    vector_result = faq_vector_engine.find_best_match(raw_question)
+
+    best_match = vector_result.get("best")
+
+    if best_match:
+        score = best_match["score"]
+        item = best_match["item"]
     data = extract_request_data()
     raw_question = str(data.get("question", "")).strip()
 
+    vector_result = faq_vector_engine.find_best_match(raw_question)
+    best_match = vector_result.get("best")
+
+    if best_match:
+        score = best_match["score"]
+        item = best_match["item"]
+    if score >= 0.70:
+        return json_response(
+        answers=[item["answer"]],
+        matched_questions=[item["question"]],
+        categories=[item.get("category", "عمومی")],
+    )
+
+    elif score >= 0.55:
+        return json_response(
+        answers=[
+            item["answer"] +
+            "\n\nاگر منظورتان مورد دیگری است، سؤال را کمی دقیق‌تر بنویسید."
+        ],
+        matched_questions=[item["question"]],
+        categories=[item.get("category", "عمومی")],
+    )
+    
+    
+    ai_result = ai_engine.analyze_question(
+    question=raw_question
+)
+    
+
+    print("AI ANALYSIS:", ai_result)
     if not raw_question:
         return json_response(["متن سؤال خالی است."], status_code=400)
 
@@ -3103,9 +3173,15 @@ def admin_chat_alerts():
 
     return render_template("admin_chat_alerts.html", alerts=alerts)
 
+
 if __name__ == "__main__":
     init_db()
     debug_mode = os.getenv("FLASK_DEBUG", "1") == "1"
-    host = os.getenv("FLASK_HOST", "0.0.0.0")
-    port = int(os.getenv("FLASK_PORT", "5000"))
-    app.run(host=host, port=port, debug=debug_mode)
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", "5001"))
+
+    app.run(
+        host=host,
+        port=port,
+        debug=debug_mode
+    )
