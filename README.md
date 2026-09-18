@@ -1,78 +1,36 @@
-<img width="1512" height="949" alt="Screenshot 2026-08-15 at 9 27 07 PM" src="https://github.com/user-attachments/assets/184ed0d4-0875-401b-aae6-e2ebd6e52646" />
-Medrik-Support-Assistant
-│
-├── README.md
-├── requirements.txt
-├── .env.example
-├── .gitignore
-│
-├── app.py
-├── accounting_qa_data.py
-├── import_faq_clean.py
-├── migrate_sqlite_to_sqlserver.py
-├── test_openai_api.py
-├── test_sqlserver_connection.py
-│
-├── templates/
-│   ├── login.html
-│   ├── index.html
-│   └── admin_pages...
-│
-├── static/
-│   ├── images/
-│   └── css/
-│
-├── docs/
-│   ├── architecture.png
-│   └── screenshots/
-│
-└── database/
-    └── README.md
+# Medrik Support Assistant 🤖
 
-    # Medrik Support Assistant 🤖
+A customer support assistant for the Medrik ERP ecosystem, built with Python, Flask and SQL Server.
 
-An intelligent support assistant developed for Medrik ERP ecosystem.
+The project aims to reduce repetitive support requests through FAQ search and knowledge management.
 
-The goal of this project is to reduce repetitive support requests by providing automated answers, knowledge management, and intelligent FAQ search.
+## Screenshot
 
----
+![Medrik Support Assistant screenshot](https://github.com/user-attachments/assets/184ed0d4-0875-401b-aae6-e2ebd6e52646)
 
-## 🚀 Features
+## Features
 
-- Intelligent FAQ-based customer support
-- Smart question matching using RapidFuzz
+- FAQ-based customer support
+- Question matching using RapidFuzz
 - SQL Server database integration
 - User authentication and role management
 - Admin panel for knowledge management
 - Unanswered question tracking
-- Feedback collection system
-- AI-ready architecture for future LLM integration
+- Feedback collection
 
----
+## Technology Stack
 
-## 🏗 Architecture
+| Area | Technologies |
+| --- | --- |
+| Backend | Python, Flask, SQLAlchemy |
+| Database | Microsoft SQL Server, PyODBC |
+| Question matching | RapidFuzz |
+| Frontend | HTML, CSS, JavaScript |
 
----
+## Main Files and Folders
 
-## 🛠 Technology Stack
-
-### Backend
-- Python
-- Flask
-- SQLAlchemy
-
-### Database
-- Microsoft SQL Server
-- PyODBC
-
-### Search Engine
-- RapidFuzz
-
-### Frontend
-- HTML
-- CSS
-- JavaScript
-
----
-
-## 📂 Project Structure
+- `app.py` — Application entry point
+- `templates/` — HTML templates
+- `static/images/` — Image assets
+- `requirements.txt` — Python dependencies
+- `README.md` — Project overview
