@@ -1296,6 +1296,8 @@ const questionGroups = {
 let activeKey = "accounting";
       let pendingNotUsefulFeedback = null;
       let lastUserQuestion = "";
+      let previousQuestion = "";
+      let previousBotAnswer = "";
 
       const input = document.getElementById("questionInput");
       const sendBtn = document.getElementById("sendBtn");
@@ -1381,8 +1383,11 @@ function linkifyText(text){
       /(https?:\/\/[^\s<]+)/g,
       function(url){
         const cleanUrl = url.trim();
+        const linkLabel = cleanUrl === "https://s2.raveshcrm.ir/login.aspx?domain=medrik"
+          ? "ورود به سامانه تیکت مدریک"
+          : "مشاهده لینک";
 
-        return '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-flex !important; align-items:center !important; justify-content:center !important; min-height:28px !important; padding:4px 10px !important; margin:4px 0 !important; border-radius:8px !important; background:rgba(255,122,0,0.14) !important; border:1px solid rgba(255,122,0,0.28) !important; color:#ffd39b !important; text-decoration:none !important; font-weight:900 !important; font-size:11px !important;">مشاهده ویدیو</a>';
+        return '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-flex !important; align-items:center !important; justify-content:center !important; min-height:28px !important; padding:4px 10px !important; margin:4px 0 !important; border-radius:8px !important; background:rgba(255,122,0,0.14) !important; border:1px solid rgba(255,122,0,0.28) !important; color:#ffd39b !important; text-decoration:none !important; font-weight:900 !important; font-size:11px !important;">' + linkLabel + '</a>';
       }
     )
     .replaceAll("\n", "<br>");
@@ -1747,7 +1752,11 @@ function renderTopicQuestions(groupKey, topicIndex) {
               "Accept": "application/json"
             },
             credentials: "same-origin",
-            body: JSON.stringify({ question: question })
+            body: JSON.stringify({
+              question: question,
+              previous_question: previousQuestion,
+              previous_answer: previousBotAnswer
+            })
           });
 
           if (response.status === 401) {
@@ -1756,10 +1765,13 @@ function renderTopicQuestions(groupKey, topicIndex) {
           }
 
           if (!response.ok) {
-            const errorText = await response.text();
-            console.error("ASK HTTP ERROR:", response.status, errorText);
+            const errorData = await response.json().catch(() => null);
+            const errorMessage = Array.isArray(errorData?.answers)
+              ? errorData.answers.filter(item => typeof item === "string").join("\n")
+              : "";
+            console.error("ASK HTTP ERROR:", response.status);
             addMessage(
-              `خطای سرور دریافت شد. کد خطا: ${response.status}\nلطفاً پنجره ترمینال Flask را بررسی کنید.`,
+              errorMessage || "پردازش پیام انجام نشد. لطفاً کمی بعد دوباره تلاش کنید.",
               "bot",
               "خطای سرور",
               question
@@ -1792,6 +1804,9 @@ function renderTopicQuestions(groupKey, topicIndex) {
               const category = Array.isArray(data.categories) ? (data.categories[i] || "") : "";
               addMessage(ans, "bot", category, question);
             });
+
+            previousQuestion = question;
+            previousBotAnswer = answers.join("\n\n");
           } else {
             addMessage(
               "پاسخی برای نمایش دریافت نشد. این سؤال برای بررسی پشتیبانی ثبت شد.",

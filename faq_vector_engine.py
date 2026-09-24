@@ -15,7 +15,8 @@ class FAQVectorEngine:
                 text("""
                     SELECT id, question, answer, category
                     FROM dbo.knowledge_base
-                    WHERE question IS NOT NULL
+                    WHERE is_active = 1
+                      AND question IS NOT NULL
                       AND answer IS NOT NULL
                 """)
             ).mappings().all()

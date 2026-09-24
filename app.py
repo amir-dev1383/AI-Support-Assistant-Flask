@@ -1089,7 +1089,9 @@ def create_chat_alert(
 
         db_commit()
     except Exception as error:
-        print("CREATE CHAT ALERT ERROR:", error)   
+        app.logger.exception("Failed to persist chat alert")
+        get_db().rollback()
+        raise
 
 
 def is_user_locked(user) -> bool:
@@ -1887,113 +1889,233 @@ def change_password():
 @login_required_page
 def home():
     return render_template("index.html")
+SUPPORT_TICKET_URL = "https://s2.raveshcrm.ir/login.aspx?domain=medrik"
+
+
+def build_human_support_answer(raw_question: str) -> str:
+    return (
+        "برای بررسی مشکل توسط تیم پشتیبانی، حتماً باید در سامانه تیکت مدریک تیکت ثبت کنید.\n"
+        "ارسال پیام در این چت به معنی ثبت تیکت نیست و جایگزین تیکت رسمی نمی‌شود.\n\n"
+        "برای ورود به سامانه و ثبت تیکت از این لینک استفاده کنید:\n"
+        f"{SUPPORT_TICKET_URL}\n\n"
+        "در تیکت، شرح مشکل، متن خطا و راه‌حل‌هایی که امتحان کرده‌اید را بنویسید.\n\n"
+        "پس از ثبت تیکت، برای پیگیری با پشتیبانی تماس بگیرید:\n"
+        "021-91303360"
+    )
+
+
+def is_clarification_request(raw_question: str) -> bool:
+    normalized_question = normalize_text(raw_question)
+    clarification_phrases = (
+        "نفهمیدم",
+        "متوجه نشدم",
+        "ساده تر بگو",
+        "واضح تر بگو",
+        "دوباره توضیح بده",
+        "بیشتر توضیح بده",
+        "میشه بیشتر توضیح بدی",
+        "منظورت چیه",
+        "یعنی چی",
+        "این قسمت رو نفهمیدم",
+        "این بخش رو نفهمیدم",
+    )
+
+    return any(
+        normalize_text(phrase) in normalized_question
+        for phrase in clarification_phrases
+    )
+
+
+def clarification_response(
+    raw_question: str,
+    previous_question: str,
+    previous_answer: str,
+):
+    try:
+        reply = ai_engine.clarify_previous_answer(
+            message=raw_question,
+            previous_question=previous_question,
+            previous_answer=previous_answer,
+        )
+    except Exception as error:
+        print("CLARIFICATION ERROR:", repr(error))
+        reply = ""
+
+    if not reply:
+        reply = (
+            "حتماً، دوباره توضیح می‌دهم. لطفاً بفرمایید کدام بخش "
+            "برای شما نامفهوم بود: مسیر منو، معنی خطا یا مراحل انجام کار؟"
+        )
+
+    return json_response(
+        answers=[reply],
+        matched_questions=[],
+        categories=["توضیح ساده‌تر"],
+    )
+
+
+def is_ticket_followup(raw_question: str) -> bool:
+    phrases = (
+        "میخوام تیکت بزنم", "می‌خوام تیکت بزنم", "می خواهم تیکت بزنم",
+        "برام تیکت ثبت کن", "چطوری تیکت ثبت کنم", "مشکلم رو به پشتیبانی بفرست",
+        "مشکل حل نشد", "مشکلم حل نشد", "این کارو کردم ولی درست نشد",
+        "هنوز همون خطا رو می‌ده", "این راه‌حل جواب نداد",
+        "همه مراحل رو رفتم باز نمی‌شه", "قبلاً هم اینو امتحان کردم",
+        "جواب شما کمکی نکرد", "من جوابی دریافت نکردم", "جوابی نگرفتم",
+    )
+    return normalize_text(raw_question) in {normalize_text(item) for item in phrases}
+
+
 def build_fallback_support_answer(raw_question: str, suggestions=None) -> str:
-    suggestions = suggestions or []
+    return (
+        "پاسخ قابل‌اعتمادی برای سؤال شما در پایگاه دانش پیدا نکردم.\n\n"
+        + build_human_support_answer(raw_question)
+    )
 
-    lines = [
-        "پاسخ دقیق این مورد هنوز در پایگاه دانش پشتیبانی مدریک ثبت نشده است.",
-        "",
-        "برای بررسی اولیه، لطفاً این موارد را کنترل یا برای تیم پشتیبانی ارسال کنید:",
-        "",
-        "1. نام ماژول یا بخشی که در آن مشکل دارید.",
-        "2. متن دقیق خطا یا پیامی که سیستم نمایش می‌دهد.",
-        "3. شماره سند، فاکتور، حواله یا رکورد مرتبط، در صورت وجود.",
-        "4. نام کاربر و عملیاتی که قبل از بروز مشکل انجام شده است.",
-        "5. زمان تقریبی بروز مشکل و اینکه آیا برای کاربران دیگر هم تکرار می‌شود یا نه.",
-        "",
-        "این سؤال برای بررسی و تکمیل پایگاه دانش پشتیبانی ثبت شد.",
-    ]
 
-    if suggestions:
-        lines.append("")
-        lines.append("چند سؤال مرتبط هم پیدا شد که ممکن است کمک کند:")
+def ticket_fallback_response(raw_question: str, normalized_question: str):
+    # ثبت داخلی فقط برای تکمیل پایگاه دانش است و نباید مانع نمایش لینک تیکت شود.
+    try:
+        log_unanswered_question(
+            raw_question=raw_question,
+            normalized_question=normalized_question,
+            suggestions=[],
+        )
+    except Exception:
+        app.logger.exception("Failed to log unanswered question")
 
-        for index, item in enumerate(suggestions, start=1):
-            lines.append(f"{index}. {item}")
+    return json_response(
+        answers=[build_fallback_support_answer(raw_question)],
+        categories=["راهنمای ثبت تیکت"],
+    )
 
-    return "\n".join(lines).strip()
+
 @app.route("/ask", methods=["POST"])
 @login_required_api
 
 def ask():
-    
+
     data = extract_request_data()
-    raw_question = str(data.get("question", "")).strip()
-    vector_result = faq_vector_engine.find_best_match(raw_question)
+    raw_question = str(data.get("question") or "").strip()
+    previous_question = str(
+        data.get("previous_question") or ""
+    ).strip()[:1000]
+    previous_answer = str(
+        data.get("previous_answer") or ""
+    ).strip()[:5000]
 
-    best_match = vector_result.get("best")
-
-    if best_match:
-        score = best_match["score"]
-        item = best_match["item"]
-    data = extract_request_data()
-    raw_question = str(data.get("question", "")).strip()
-
-    vector_result = faq_vector_engine.find_best_match(raw_question)
-    best_match = vector_result.get("best")
-
-    if best_match:
-        score = best_match["score"]
-        item = best_match["item"]
-    if score >= 0.70:
-        return json_response(
-        answers=[item["answer"]],
-        matched_questions=[item["question"]],
-        categories=[item.get("category", "عمومی")],
-    )
-
-    elif score >= 0.55:
-        return json_response(
-        answers=[
-            item["answer"] +
-            "\n\nاگر منظورتان مورد دیگری است، سؤال را کمی دقیق‌تر بنویسید."
-        ],
-        matched_questions=[item["question"]],
-        categories=[item.get("category", "عمومی")],
-    )
-    
-    
-    ai_result = ai_engine.analyze_question(
-    question=raw_question
-)
-    
-
-    print("AI ANALYSIS:", ai_result)
     if not raw_question:
-        return json_response(["متن سؤال خالی است."], status_code=400)
+        return json_response(
+            ["متن سؤال خالی است."],
+            status_code=400
+        )
 
     normalized_question = normalize_text(raw_question)
 
-    if not normalized_question:
-        return json_response(["متن سؤال خالی است."], status_code=400)
-
-    message_intent = detect_message_intent(raw_question, normalized_question)
-    print("MESSAGE INTENT:", message_intent)
-
-    if message_intent == "support":
-        support_answer = build_human_support_answer(raw_question)
-
-        create_chat_alert(
-            alert_type="support_request",
-            title="درخواست ارتباط با پشتیبانی",
-            message=support_answer,
-            source_question=raw_question,
+    if previous_answer and is_clarification_request(raw_question):
+        return clarification_response(
+            raw_question,
+            previous_question,
+            previous_answer,
         )
 
-        record_activity(
-            action="support_requested",
-            entity_type="support_request",
-            entity_id=None,
-            details=f"question={raw_question[:300]}",
+    if is_ticket_followup(raw_question):
+        return json_response(
+            answers=[build_human_support_answer(raw_question)],
+            categories=["راهنمای ثبت تیکت"],
+        )
+
+    message_type = None
+    route_confidence = 0.0
+
+    # تشخیص نوع پیام با AI Router
+    try:
+        route_result = ai_engine.route_message(
+            raw_question,
+            previous_question=previous_question,
+            previous_answer=previous_answer,
+        )
+
+        print("ROUTER RESULT:", route_result)
+
+        message_type = route_result.get("type")
+        route_confidence = route_result.get("confidence", 0.0)
+
+        if (
+            message_type == "clarification_request"
+            and route_confidence >= 0.70
+            and previous_answer
+        ):
+            return clarification_response(
+                raw_question,
+                previous_question,
+                previous_answer,
+            )
+
+        if message_type == "smalltalk" and route_confidence >= 0.85:
+            try:
+                reply = ai_engine.generate_smalltalk_reply(
+                    raw_question
+                )
+
+                print("SMALLTALK REPLY:", reply)
+
+                return json_response(
+                    answers=[reply],
+                    matched_questions=[],
+                    categories=["گفت‌وگوی عمومی"],
+                )
+
+            except Exception as e:
+                print("SMALLTALK ERROR:", repr(e))
+
+                return json_response(
+                    answers=[
+                        "سلام، در خدمتم. چه کمکی از دستم برمیاد؟"
+                    ],
+                    matched_questions=[],
+                    categories=["گفت‌وگوی عمومی"],
+                )
+
+        if message_type == "unclear" and route_confidence >= 0.60:
+            return json_response(
+                answers=[
+                    "متوجه نشدم دقیقاً کدام بخش برای شما درست کار نمی‌کند. "
+                    "لطفاً بفرمایید در کدام قسمت نرم‌افزار هستید و چه کاری انجام نمی‌شود.\n\n"
+                    + build_human_support_answer(raw_question)
+                ],
+                matched_questions=[],
+                categories=["نیازمند توضیح بیشتر"],
+            )
+
+    except Exception as e:
+        print("MESSAGE ROUTER ERROR:", repr(e))
+
+
+    # تشخیص درخواست پشتیبانی
+    message_intent = detect_message_intent(
+        raw_question,
+        normalized_question
+    )
+
+    print("MESSAGE INTENT:", message_intent)
+    if message_intent == "support" or (
+        message_type == "support_request" and route_confidence >= 0.85
+    ):
+        support_answer = build_human_support_answer(
+            raw_question
         )
 
         return json_response(
             answers=[support_answer],
             matched_questions=[],
-            categories=["درخواست پشتیبانی"],
-        )   
-                
-    quick_answer = get_exact_or_quick_reply(normalized_question)
+            categories=["راهنمای ثبت تیکت"],
+        )
+
+    # پاسخ‌های سریع مثل سلام
+    quick_answer = get_exact_or_quick_reply(
+        normalized_question
+    )
 
     if quick_answer:
         return json_response(
@@ -2002,52 +2124,57 @@ def ask():
             categories=["عمومی"],
         )
 
-    best_matches = search_best_answers(normalized_question)
-
-    if not best_matches:
-        
-        suggestions = get_related_questions(normalized_question, limit=3)
-
-        log_unanswered_question(
-            raw_question=raw_question,
-            normalized_question=normalized_question,
-            suggestions=suggestions,
+    # AI + Vector + Judge
+    # اگر هر بخش AI خطا کند، چت‌بات خراب نمی‌شود
+    # و مسیر قدیمی FAQ/Fallback ادامه پیدا می‌کند.
+    vector_search_completed = False
+    try:
+        vector_result = faq_vector_engine.find_best_match(
+            raw_question
         )
 
-        fallback_answer = build_fallback_support_answer(
-            raw_question=raw_question,
-            suggestions=suggestions,
+        best_match = vector_result.get("best")
+        vector_search_completed = True
+
+        if best_match:
+            item = best_match["item"]
+
+            judge_confidence = vector_result.get(
+                "judge_confidence",
+                0.0
+            )
+
+            if judge_confidence >= 0.80:
+                return json_response(
+                    answers=[item["answer"]],
+                    matched_questions=[
+                        item["question"]
+                    ],
+                    categories=[
+                        item.get("category", "عمومی")
+                    ],
+                )
+
+    except Exception as e:
+        print(
+            "AI VECTOR ERROR:",
+            repr(e)
         )
 
-        return json_response(
-            answers=[fallback_answer],
-            suggestions=suggestions,
-            matched_questions=[],
-            categories=["نیازمند بررسی پشتیبانی"],
-        )
+    # رد پاسخ توسط Judge نباید با پاسخ مشابه از مسیر قدیمی دور زده شود.
+    if vector_search_completed:
+        return ticket_fallback_response(raw_question, normalized_question)
 
-    smart_answer = build_smart_answer(raw_question, best_matches)
+    # در دسترس نبودن AI: تنها در صورت یافتن پاسخ در مسیر محلی پاسخ می‌دهیم.
+    try:
+        best_matches = search_best_answers(normalized_question)
+        smart_answer = build_smart_answer(raw_question, best_matches) if best_matches else ""
+    except Exception:
+        app.logger.exception("Local FAQ search failed")
+        return ticket_fallback_response(raw_question, normalized_question)
 
     if not smart_answer:
-        suggestions = get_related_questions(normalized_question, limit=3)
-
-        log_unanswered_question(
-            raw_question=raw_question,
-            normalized_question=normalized_question,
-            suggestions=suggestions,
-        )
-
-        fallback_answer = build_fallback_support_answer(
-            raw_question=raw_question,
-            suggestions=suggestions,
-        )
-
-        return json_response(
-            answers=[fallback_answer],
-            suggestions=suggestions,
-            matched_questions=[],
-            categories=["نیازمند بررسی پشتیبانی"],
-        )
+        return ticket_fallback_response(raw_question, normalized_question)
 
     matched_questions = []
     categories = []
@@ -2073,6 +2200,21 @@ def ask():
         matched_questions=matched_questions,
         categories=categories,
     )
+@app.errorhandler(500)
+def handle_server_error(error):
+    print("SERVER ERROR:", error)
+
+    if request.path == "/ask":
+        return json_response(
+            answers=[
+                "هنگام پردازش پیام خطایی رخ داد. لطفاً کمی بعد دوباره تلاش کنید."
+            ],
+            matched_questions=[],
+            categories=["نیازمند بررسی پشتیبانی"],
+            status_code=500
+        )
+
+    return "Internal Server Error", 500
 def get_exact_knowledge_answer(normalized_question: str):
     rows = db_fetchall(
         """

@@ -140,6 +140,170 @@ FAQهای پیشنهادی:
                 "confidence": 0.0,
                 "reason": "invalid_ai_response"
             }
+    def route_message(
+        self,
+        message,
+        previous_question="",
+        previous_answer=""
+    ):
+        prompt = f"""
+تو Router چت‌بات پشتیبانی مدریک هستی.
 
+فقط باید نوع پیام کاربر را تشخیص بدهی.
+نباید جواب سؤال را بدهی.
+
+نوع پیام باید فقط یکی از این‌ها باشد:
+
+1. smalltalk
+برای سلام، احوالپرسی، تشکر، خداحافظی و مکالمه کوتاه روزمره.
+
+2. product_question
+برای سؤال درباره نرم‌افزار، امکانات، خطاها، حسابداری، انبار، فروش، گزارش‌ها و محصولات مدریک.
+
+3. support_request
+وقتی کاربر درخواست ارتباط با پشتیبانی، ثبت تیکت، راهنمای ثبت تیکت یا کمک انسانی دارد.
+همچنین وقتی کاربر می‌گوید پاسخی دریافت نکرده، نمی‌داند چه کسی باید پاسخ بدهد، یا راه‌حل قبلی را امتحان کرده ولی مشکل هنوز حل نشده است.
+مثال: «این راه‌حل جواب نداد»، «همه مراحل رو رفتم ولی هنوز همون خطا رو می‌ده».
+معنی پیام را تشخیص بده؛ پیام لازم نیست دقیقاً مطابق مثال‌ها باشد.
+صرفاً شرح یک خطای جدید product_question است؛ اعلام حل‌نشدن مشکل پس از راهنمایی support_request است.
+اگر کاربر می‌گوید مشکل حل شده یا نیازی به تیکت ندارد، آن را درخواست پشتیبانی حساب نکن.
+
+4. clarification_request
+وقتی کاربر پاسخ قبلی را نفهمیده و می‌خواهد همان پاسخ ساده‌تر، واضح‌تر یا دوباره توضیح داده شود.
+این نوع فقط زمانی مجاز است که پاسخ قبلی وجود داشته باشد.
+مثال: «نفهمیدم»، «منظورت چیه؟»، «ساده‌تر بگو»، «این قسمت رو دوباره توضیح بده».
+درخواست توضیح مجدد به معنی حل‌نشدن مشکل یا درخواست تیکت نیست.
+
+5. unclear
+وقتی پیام آن‌قدر مبهم است که نمی‌توان فهمید کاربر دقیقاً چه می‌خواهد.
+
+6. out_of_scope
+وقتی سؤال ارتباطی با مدریک یا پشتیبانی نرم‌افزار ندارد.
+
+سؤال قبلی کاربر:
+{previous_question or "وجود ندارد"}
+
+پاسخ قبلی دستیار:
+{previous_answer or "وجود ندارد"}
+
+پیام کاربر:
+{message}
+
+فقط JSON برگردان:
+
+{{
+  "type": "smalltalk",
+  "confidence": 0.0
+}}
+"""
+
+        response = self.client.responses.create(
+            model="gpt-5.6-luna",
+            input=prompt
+        )
+
+        text = response.output_text.strip()
+
+        try:
+            result = json.loads(text)
+        except Exception:
+            return {
+                "type": "unclear",
+                "confidence": 0.0
+            }
+
+        allowed_types = {
+            "smalltalk",
+            "product_question",
+            "support_request",
+            "clarification_request",
+            "unclear",
+            "out_of_scope"
+        }
+
+        message_type = result.get("type", "unclear")
+
+        if message_type not in allowed_types:
+            message_type = "unclear"
+
+        try:
+            confidence = float(
+                result.get("confidence", 0.0)
+            )
+        except (TypeError, ValueError):
+            confidence = 0.0
+
+        return {
+            "type": message_type,
+            "confidence": confidence
+        }
+
+    def clarify_previous_answer(
+        self,
+        message,
+        previous_question,
+        previous_answer
+    ):
+        prompt = f"""
+تو دستیار پشتیبانی مدریک هستی.
+
+کاربر پاسخ قبلی را متوجه نشده و توضیح ساده‌تری می‌خواهد.
+
+سؤال قبلی کاربر:
+{previous_question}
+
+پاسخ قبلی:
+{previous_answer}
+
+پیام جدید کاربر:
+{message}
+
+قوانین:
+- فقط پاسخ قبلی را ساده‌تر و مرحله‌به‌مرحله توضیح بده.
+- اطلاعات فنی جدید تولید نکن و چیزی را حدس نزن.
+- لینک، شماره تلفن، مسیر منو و عددهای مهم را تغییر نده.
+- پاسخ کوتاه، روشن و دوستانه باشد.
+- در پایان بپرس کدام بخش هنوز نامفهوم است.
+"""
+
+        response = self.client.responses.create(
+            model="gpt-5.6-luna",
+            input=prompt
+        )
+
+        return response.output_text.strip()
+
+    def generate_smalltalk_reply(self, message):
+        prompt = f"""
+تو دستیار پشتیبانی مدریک هستی.
+
+کاربر یک پیام مکالمه روزمره فرستاده است.
+
+قوانین:
+- کوتاه، طبیعی و دوستانه جواب بده.
+- جواب خشک و رباتی نده.
+- اگر کاربر احوالپرسی کرد، احوالپرسی کن.
+- اگر تشکر کرد، محترمانه پاسخ بده.
+- اگر خداحافظی کرد، خداحافظی کن.
+- بحث را بی‌دلیل طولانی نکن.
+- اگر مناسب بود، در پایان کاربر را به مطرح کردن سؤال درباره مدریک دعوت کن.
+- وارد پاسخ فنی درباره نرم‌افزار نشو.
+
+پیام کاربر:
+{message}
+"""
+
+        response = self.client.responses.create(
+            model="gpt-5.6-luna",
+            input=prompt
+        )
+
+        reply = response.output_text.strip()
+
+        if not reply:
+            return "سلام، در خدمتم. چه کمکی از دستم برمیاد؟"
+
+        return reply
+        
 
 ai_engine = AIEngine()
