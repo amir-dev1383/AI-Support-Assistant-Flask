@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
@@ -19,8 +20,12 @@ class AIEngine:
             "paraphrase-multilingual-MiniLM-L12-v2",
         )
         self.timeout_seconds = float(os.getenv("OPENAI_TIMEOUT_SECONDS", "30"))
+        self.retry_cooldown_seconds = int(
+            os.getenv("OPENAI_RETRY_COOLDOWN_SECONDS", "60")
+        )
         self._openai_client = None
         self._embedding_model = None
+        self._openai_unavailable_until = 0.0
 
     @property
     def enabled(self) -> bool:
@@ -28,6 +33,8 @@ class AIEngine:
 
     def _get_client(self):
         if not self.enabled:
+            return None
+        if time.monotonic() < self._openai_unavailable_until:
             return None
         if self._openai_client is None:
             from openai import OpenAI
@@ -73,7 +80,13 @@ class AIEngine:
         client = self._get_client()
         if client is None:
             return ""
-        response = client.responses.create(model=self.response_model, input=prompt)
+        try:
+            response = client.responses.create(model=self.response_model, input=prompt)
+        except Exception:
+            self._openai_unavailable_until = (
+                time.monotonic() + self.retry_cooldown_seconds
+            )
+            raise
         return str(response.output_text or "").strip()
 
     def create_embeddings(self, texts: List[str]) -> List[Any]:
@@ -220,14 +233,7 @@ class AIEngine:
         if not evidence:
             return self._empty_composition(subquestions)
         if not self.enabled:
-            best = evidence[0]
-            return {
-                "answer": str(best.get("content") or "").strip(),
-                "used_source_ids": [str(best.get("source_id"))],
-                "answered_parts": subquestions[:1] or [question],
-                "unanswered_parts": subquestions[1:],
-                "confidence": self._safe_float(best.get("score")),
-            }
+            return self._compose_from_evidence(question, subquestions, evidence)
 
         evidence_text = "\n\n".join(
             (
@@ -263,8 +269,8 @@ class AIEngine:
         try:
             result = self._parse_json_object(self._complete(prompt)) or {}
         except Exception:
-            return self._empty_composition(subquestions)
-        return {
+            return self._compose_from_evidence(question, subquestions, evidence)
+        composition = {
             "answer": str(result.get("answer") or "").strip(),
             "used_source_ids": self._unique_strings(
                 result.get("used_source_ids") or [], 20
@@ -277,6 +283,9 @@ class AIEngine:
             ),
             "confidence": self._safe_float(result.get("confidence")),
         }
+        if not composition["answer"] or not composition["used_source_ids"]:
+            return self._compose_from_evidence(question, subquestions, evidence)
+        return composition
 
     def route_message(
         self,
@@ -354,7 +363,10 @@ class AIEngine:
             reply = self._complete(prompt)
         except Exception:
             reply = ""
-        return reply or previous_answer
+        return reply or (
+            f"حتماً. منظور پاسخ قبلی این بود:\n\n{previous_answer}\n\n"
+            "دقیقاً کدام مرحله هنوز نامفهوم است؟"
+        )
 
     def generate_smalltalk_reply(self, message: str) -> str:
         if not self.enabled:
@@ -403,6 +415,60 @@ class AIEngine:
             "answered_parts": [],
             "unanswered_parts": subquestions,
             "confidence": 0.0,
+        }
+
+    def _compose_from_evidence(
+        self,
+        question: str,
+        subquestions: List[str],
+        evidence: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        minimum_score = float(os.getenv("KNOWLEDGE_OFFLINE_MIN_SCORE", "0.68"))
+        ranked = sorted(
+            evidence,
+            key=lambda item: self._safe_float(item.get("score")),
+            reverse=True,
+        )
+        if not ranked:
+            return self._empty_composition(subquestions)
+
+        top_score = self._safe_float(ranked[0].get("score"))
+        if top_score < minimum_score:
+            return self._empty_composition(subquestions)
+
+        selected = [
+            item
+            for item in ranked
+            if self._safe_float(item.get("score")) >= minimum_score
+            and self._safe_float(item.get("score")) >= top_score - 0.06
+        ][:3]
+        selected = [
+            item
+            for item in selected
+            if str(item.get("content") or "").strip() and item.get("source_id")
+        ]
+        if not selected:
+            return self._empty_composition(subquestions)
+
+        if len(selected) == 1:
+            answer = str(selected[0].get("content") or "").strip()
+        else:
+            sections = []
+            for index, item in enumerate(selected, start=1):
+                title = str(item.get("title") or f"بخش {index}").strip()
+                content = str(item.get("content") or "").strip()
+                sections.append(f"{index}. {title}\n{content}")
+            answer = "\n\n".join(sections)
+
+        return {
+            "answer": answer,
+            "used_source_ids": [str(item["source_id"]) for item in selected],
+            "answered_parts": subquestions or [question],
+            "unanswered_parts": [],
+            "confidence": min(
+                self._safe_float(item.get("score"))
+                for item in selected
+            ),
         }
 
     @staticmethod

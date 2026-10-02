@@ -1,5 +1,6 @@
 import time
 import unittest
+from unittest.mock import patch
 
 from ai_engine import AIEngine
 from faq_vector_engine import FAQVectorEngine
@@ -74,6 +75,26 @@ class AIEngineTests(unittest.TestCase):
             "پاسخ قبلی وجود دارد",
         )
         self.assertEqual(result["type"], "clarification_request")
+
+    def test_grounded_answer_uses_strong_evidence_when_api_fails(self):
+        engine = AIEngine()
+        evidence = [
+            {
+                "source_id": "faq:1",
+                "title": "ثبت سند",
+                "content": "مراحل تأییدشده ثبت سند",
+                "score": 0.94,
+            }
+        ]
+        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+            with patch.object(engine, "_complete", side_effect=RuntimeError("offline")):
+                result = engine.compose_grounded_answer(
+                    "ثبت سند چگونه است؟",
+                    ["ثبت سند چگونه است؟"],
+                    evidence,
+                )
+        self.assertEqual(result["used_source_ids"], ["faq:1"])
+        self.assertIn("مراحل تأییدشده", result["answer"])
 
 
 class RetrieverTests(unittest.TestCase):
