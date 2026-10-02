@@ -96,6 +96,68 @@ class AIEngineTests(unittest.TestCase):
         self.assertEqual(result["used_source_ids"], ["faq:1"])
         self.assertIn("مراحل تأییدشده", result["answer"])
 
+    def test_offline_decomposition_splits_actionable_questions(self):
+        parts = AIEngine._decompose_offline(
+            "چطور سند ثبت کنم و چگونه موجودی انبار را کنترل کنم؟"
+        )
+        self.assertEqual(
+            parts,
+            ["چطور سند ثبت کنم", "چگونه موجودی انبار را کنترل کنم"],
+        )
+
+    def test_offline_decomposition_keeps_single_topic_intact(self):
+        parts = AIEngine._decompose_offline(
+            "گزارش فروش و انبار را چگونه مشاهده کنم؟"
+        )
+        self.assertEqual(parts, ["گزارش فروش و انبار را چگونه مشاهده کنم"])
+
+    def test_offline_composition_marks_uncovered_part(self):
+        engine = AIEngine()
+        result = engine._compose_from_evidence(
+            "سؤال ترکیبی",
+            ["ثبت سند", "کنترل موجودی"],
+            [
+                {
+                    "source_id": "faq:1",
+                    "title": "ثبت سند",
+                    "content": "مراحل ثبت سند",
+                    "score": 0.95,
+                    "matched_queries": ["ثبت سند"],
+                }
+            ],
+        )
+        self.assertEqual(result["answered_parts"], ["ثبت سند"])
+        self.assertEqual(result["unanswered_parts"], ["کنترل موجودی"])
+
+    def test_offline_composition_selects_best_source_for_each_part(self):
+        engine = AIEngine()
+        result = engine._compose_from_evidence(
+            "سؤال ترکیبی",
+            ["ثبت سند", "کنترل موجودی"],
+            [
+                {
+                    "source_id": "faq:1",
+                    "title": "ثبت سند",
+                    "content": "مراحل ثبت سند",
+                    "score": 0.82,
+                    "matched_query_scores": {
+                        "ثبت سند": 0.82,
+                        "کنترل موجودی": 0.62,
+                    },
+                },
+                {
+                    "source_id": "faq:2",
+                    "title": "کنترل موجودی",
+                    "content": "مراحل کنترل موجودی",
+                    "score": 0.75,
+                    "matched_query_scores": {"کنترل موجودی": 0.75},
+                },
+            ],
+        )
+        self.assertEqual(result["used_source_ids"], ["faq:1", "faq:2"])
+        self.assertEqual(result["answered_parts"], ["ثبت سند", "کنترل موجودی"])
+        self.assertEqual(result["unanswered_parts"], [])
+
 
 class RetrieverTests(unittest.TestCase):
     def setUp(self):
@@ -148,6 +210,10 @@ class RetrieverTests(unittest.TestCase):
         )
         ids = [item["source_id"] for item in evidence]
         self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(
+            set(evidence[0]["matched_queries"]),
+            {"ثبت سند", "ثبت سند حسابداری"},
+        )
 
 
 class KnowledgeAnswerServiceTests(unittest.TestCase):

@@ -221,8 +221,7 @@ class AIEngine:
             except Exception:
                 pass
 
-        parts = re.split(r"[؟?]+|\s+(?:همچنین|بعلاوه)\s+", clean_question)
-        return self._unique_strings(parts, max_parts) or [clean_question]
+        return self._decompose_offline(clean_question, max_parts)
 
     def compose_grounded_answer(
         self,
@@ -417,6 +416,48 @@ class AIEngine:
             "confidence": 0.0,
         }
 
+    @classmethod
+    def _decompose_offline(cls, question: str, max_parts: int = 4) -> List[str]:
+        clean_question = " ".join(str(question or "").strip().split()).strip(
+            "؟?؛; "
+        )
+        if not clean_question:
+            return []
+
+        explicit_parts = cls._unique_strings(
+            re.split(
+                r"[؟?]+|\s*(?:؛|;)\s*|\s+(?:همچنین|بعلاوه|به علاوه)\s+",
+                clean_question,
+            ),
+            max_parts,
+        )
+        if len(explicit_parts) > 1:
+            return explicit_parts
+
+        conjunction_parts = cls._unique_strings(
+            re.split(r"\s+و\s+", clean_question),
+            max_parts,
+        )
+        if not 2 <= len(conjunction_parts) <= max_parts:
+            return [clean_question]
+
+        action_pattern = re.compile(
+            r"(چطور|چگونه|کجا|میشه|می‌شود|می شود|"
+            r"کنم|کنیم|بزنم|ببینم|بگیرم|بدهم|بدم|"
+            r"می‌کنم|میکنم|می‌خواهم|میخوام|خطا)"
+        )
+        leading_action_pattern = re.compile(
+            r"^(ثبت|تعریف|ایجاد|حذف|ویرایش|ارسال|کنترل|مشاهده)\s"
+        )
+        actionable_count = sum(
+            1
+            for part in conjunction_parts
+            if action_pattern.search(part) or leading_action_pattern.search(part)
+        )
+        if actionable_count < 2:
+            return [clean_question]
+        return conjunction_parts
+
     def _compose_from_evidence(
         self,
         question: str,
@@ -436,12 +477,42 @@ class AIEngine:
         if top_score < minimum_score:
             return self._empty_composition(subquestions)
 
-        selected = [
-            item
-            for item in ranked
-            if self._safe_float(item.get("score")) >= minimum_score
-            and self._safe_float(item.get("score")) >= top_score - 0.06
-        ][:3]
+        best_for_query: Dict[str, Any] = {}
+        for item in ranked:
+            query_scores = dict(item.get("matched_query_scores") or {})
+            for matched_query, query_score in query_scores.items():
+                clean_query = str(matched_query or "").strip()
+                score = self._safe_float(query_score)
+                previous = best_for_query.get(clean_query)
+                if (
+                    clean_query
+                    and score >= minimum_score
+                    and (previous is None or score > previous[0])
+                ):
+                    best_for_query[clean_query] = (score, item)
+
+        if best_for_query:
+            selected = []
+            selected_ids = set()
+            for _score, item in sorted(
+                best_for_query.values(),
+                key=lambda value: value[0],
+                reverse=True,
+            ):
+                source_id = str(item.get("source_id") or "")
+                if not source_id or source_id in selected_ids:
+                    continue
+                selected.append(item)
+                selected_ids.add(source_id)
+                if len(selected) >= 4:
+                    break
+        else:
+            selected = [
+                item
+                for item in ranked
+                if self._safe_float(item.get("score")) >= minimum_score
+                and self._safe_float(item.get("score")) >= top_score - 0.06
+            ][:3]
         selected = [
             item
             for item in selected
@@ -460,11 +531,36 @@ class AIEngine:
                 sections.append(f"{index}. {title}\n{content}")
             answer = "\n\n".join(sections)
 
+        covered_queries = set()
+        for item in selected:
+            query_scores = dict(item.get("matched_query_scores") or {})
+            if not query_scores:
+                matched_queries = item.get("matched_queries") or [
+                    item.get("matched_query")
+                ]
+                query_scores = {
+                    str(matched_query or ""): item.get("score")
+                    for matched_query in matched_queries
+                }
+            for matched_query, query_score in query_scores.items():
+                clean_query = str(matched_query or "").strip()
+                if clean_query and self._safe_float(query_score) >= minimum_score:
+                    covered_queries.add(clean_query)
+        answered_parts = [
+            part for part in subquestions if str(part).strip() in covered_queries
+        ]
+        unanswered_parts = [
+            part for part in subquestions if str(part).strip() not in covered_queries
+        ]
+        if not answered_parts:
+            answered_parts = subquestions or [question]
+            unanswered_parts = []
+
         return {
             "answer": answer,
             "used_source_ids": [str(item["source_id"]) for item in selected],
-            "answered_parts": subquestions or [question],
-            "unanswered_parts": [],
+            "answered_parts": answered_parts,
+            "unanswered_parts": unanswered_parts,
             "confidence": min(
                 self._safe_float(item.get("score"))
                 for item in selected

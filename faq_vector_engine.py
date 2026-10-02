@@ -218,8 +218,33 @@ class FAQVectorEngine:
             for match in self.find_matches(question, limit=per_query):
                 source_id = str(match.get("source_id"))
                 previous = best_by_id.get(source_id)
-                if previous is None or match["score"] > previous["score"]:
-                    best_by_id[source_id] = match
+                if previous is None:
+                    stored_match = dict(match)
+                    stored_match["matched_queries"] = [question]
+                    stored_match["matched_query_scores"] = {
+                        question: float(match["score"])
+                    }
+                    best_by_id[source_id] = stored_match
+                    continue
+
+                matched_queries = list(previous.get("matched_queries") or [])
+                if question not in matched_queries:
+                    matched_queries.append(question)
+                matched_query_scores = dict(
+                    previous.get("matched_query_scores") or {}
+                )
+                matched_query_scores[question] = max(
+                    float(match["score"]),
+                    float(matched_query_scores.get(question, 0.0)),
+                )
+                if match["score"] > previous["score"]:
+                    stored_match = dict(match)
+                    stored_match["matched_queries"] = matched_queries
+                    stored_match["matched_query_scores"] = matched_query_scores
+                    best_by_id[source_id] = stored_match
+                else:
+                    previous["matched_queries"] = matched_queries
+                    previous["matched_query_scores"] = matched_query_scores
 
         results = sorted(
             best_by_id.values(),
