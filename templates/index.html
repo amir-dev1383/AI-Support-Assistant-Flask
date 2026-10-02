@@ -334,6 +334,36 @@ html.light-mode body .question-chip:hover{
       gap:8px;
     }
 
+    .topbar-support-link{
+      min-height:38px;
+      padding:0 12px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:11px;
+      border:1px solid rgba(255,122,0,0.26);
+      background:rgba(255,122,0,0.10);
+      color:#ffd4a3;
+      text-decoration:none;
+      font-size:11px;
+      font-weight:900;
+      white-space:nowrap;
+      transition:.15s ease;
+    }
+
+    .topbar-support-link:hover{
+      transform:translateY(-1px);
+      background:rgba(255,122,0,0.18);
+      border-color:rgba(255,122,0,0.44);
+    }
+
+    .topbar-support-link.phone{
+      direction:ltr;
+      background:rgba(31,194,91,0.09);
+      border-color:rgba(31,194,91,0.24);
+      color:#bfffd2;
+    }
+
     .theme-toggle-btn{
       width:38px;
       height:38px;
@@ -598,6 +628,15 @@ html.light-mode body .question-chip:hover{
       .side-panel{ display:none; }
     }
 
+    @media (max-width: 720px){
+      .topbar{align-items:flex-start;padding:12px}
+      .topbar-left p{display:none}
+      .topbar-actions{gap:5px}
+      .topbar-support-link{width:38px;padding:0;justify-content:center;font-size:0}
+      .topbar-support-link .support-icon{font-size:16px}
+      .status-badge{display:none}
+    }
+
     body.light-mode,
     html.light-mode body{
       --text:#172033;
@@ -631,6 +670,34 @@ html.light-mode body .question-chip:hover{
       background:#e9dfd2 !important;
       border-bottom:2px solid rgba(201,93,0,0.34) !important;
     }
+
+    body.light-mode .topbar-support-link,
+    html.light-mode body .topbar-support-link{
+      color:#8a4100;
+      background:rgba(255,122,0,0.10);
+      border-color:rgba(180,82,0,0.28);
+    }
+
+    body.light-mode .topbar-support-link.phone,
+    html.light-mode body .topbar-support-link.phone{
+      color:#146b37;
+      background:rgba(31,194,91,0.08);
+      border-color:rgba(20,130,66,0.22);
+    }
+
+    .source-box{
+      margin:8px 0 0;
+      padding:10px 12px;
+      border:1px solid rgba(255,122,0,0.18);
+      border-radius:12px;
+      background:rgba(255,122,0,0.055);
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.9;
+    }
+
+    .source-title{font-weight:900;color:var(--text);margin-bottom:4px}
+    .source-item{display:block}
 
 body.light-mode .questions-panel,
 body.light-mode .groups-panel,
@@ -1039,7 +1106,7 @@ html.light-mode body .logout-btn{
 .admin-action-links{
   width:100% !important;
   display:grid !important;
-  grid-template-columns:1fr 1fr !important;
+  grid-template-columns:repeat(3,1fr) !important;
   gap:8px !important;
   align-items:center !important;
 }
@@ -1103,6 +1170,16 @@ html.light-mode body .logout-btn{
         </div>
 
         <div class="topbar-actions">
+          <a class="topbar-support-link" href="https://s2.raveshcrm.ir/login.aspx?domain=medrik" target="_blank" rel="noopener noreferrer" title="ثبت تیکت پشتیبانی">
+            <span class="support-icon">🎫</span>
+            <span>ثبت تیکت</span>
+          </a>
+
+          <a class="topbar-support-link phone" href="tel:02191303360" title="تماس با پشتیبانی">
+            <span class="support-icon">☎</span>
+            <span>021-91303360</span>
+          </a>
+
           <button id="themeToggleBtn" class="theme-toggle-btn" type="button" title="تغییر حالت نمایش">🌙</button>
 
           <div class="status-badge">
@@ -1162,6 +1239,10 @@ html.light-mode body .logout-btn{
 
             <a class="admin-report-btn alert-report-btn" href="{{ url_for('admin_chat_alerts') }}">
               آلارم‌های چت
+            </a>
+
+            <a class="admin-report-btn" href="{{ url_for('admin_knowledge') }}">
+              آموزش چت‌بات
             </a>
           </div>
         {% endif %}
@@ -1298,6 +1379,7 @@ let activeKey = "accounting";
       let lastUserQuestion = "";
       let previousQuestion = "";
       let previousBotAnswer = "";
+      let awaitingClarificationDetail = false;
 
       const input = document.getElementById("questionInput");
       const sendBtn = document.getElementById("sendBtn");
@@ -1494,6 +1576,36 @@ function linkifyText(text){
 
         bubble.appendChild(box);
         wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addSourceBox(sources) {
+        if (!Array.isArray(sources) || sources.length === 0) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "message bot";
+        const box = document.createElement("div");
+        box.className = "source-box";
+
+        const title = document.createElement("div");
+        title.className = "source-title";
+        title.textContent = "منابع استفاده‌شده:";
+        box.appendChild(title);
+
+        sources.forEach(function (source) {
+          const item = document.createElement("span");
+          item.className = "source-item";
+          const sourceTitle = String(source?.title || "منبع دانش").trim();
+          const category = String(source?.category || "").trim();
+          const version = String(source?.version || "").trim();
+          item.textContent = "• " + sourceTitle
+            + (category ? " — " + category : "")
+            + (version ? " — نسخه " + version : "");
+          box.appendChild(item);
+        });
+
+        wrapper.appendChild(box);
         chatMessages.appendChild(wrapper);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -1755,7 +1867,8 @@ function renderTopicQuestions(groupKey, topicIndex) {
             body: JSON.stringify({
               question: question,
               previous_question: previousQuestion,
-              previous_answer: previousBotAnswer
+              previous_answer: previousBotAnswer,
+              awaiting_clarification_detail: awaitingClarificationDetail
             })
           });
 
@@ -1805,8 +1918,11 @@ function renderTopicQuestions(groupKey, topicIndex) {
               addMessage(ans, "bot", category, question);
             });
 
-            previousQuestion = question;
-            previousBotAnswer = answers.join("\n\n");
+            if (data.preserve_context !== true) {
+              previousQuestion = question;
+              previousBotAnswer = answers.join("\n\n");
+            }
+            awaitingClarificationDetail = data.awaiting_clarification_detail === true;
           } else {
             addMessage(
               "پاسخی برای نمایش دریافت نشد. این سؤال برای بررسی پشتیبانی ثبت شد.",
@@ -1818,6 +1934,10 @@ function renderTopicQuestions(groupKey, topicIndex) {
 
           if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
             addSuggestionBox(data.suggestions);
+          }
+
+          if (Array.isArray(data.sources) && data.sources.length > 0) {
+            addSourceBox(data.sources);
           }
 
         } catch (error) {

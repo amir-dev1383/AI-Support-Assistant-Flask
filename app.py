@@ -13,6 +13,7 @@ from rapidfuzz import fuzz
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
 from faq_vector_engine import FAQVectorEngine
+from knowledge_service import KnowledgeAnswerService
 
 from accounting_qa_data import accounting_qa_data, greetings, quick_replies
 
@@ -84,6 +85,10 @@ ACTIVITY_ACTION_LABELS = {
     "faq_created": "ثبت پاسخ در پایگاه دانش",
     "faq_updated": "ویرایش پاسخ پایگاه دانش",
     "faq_toggled": "فعال/غیرفعال کردن پاسخ پایگاه دانش",
+    "knowledge_document_created": "ثبت سند آموزشی",
+    "knowledge_document_updated": "ویرایش سند آموزشی",
+    "knowledge_document_toggled": "فعال/غیرفعال کردن سند آموزشی",
+    "knowledge_candidate_approved": "تأیید پیشنهاد آموزشی",
     "user_created": "ایجاد کاربر جدید",
     "user_updated": "ویرایش اطلاعات کاربر",
     "user_toggled": "فعال/غیرفعال کردن کاربر",
@@ -95,6 +100,8 @@ ACTIVITY_ENTITY_LABELS = {
     "keyword_group": "گروه کلیدواژه",
     "unanswered_question": "سؤال بی‌پاسخ",
     "knowledge_base": "پایگاه دانش",
+    "knowledge_document": "سند آموزشی",
+    "knowledge_candidate": "پیشنهاد آموزشی",
     "user": "کاربر",
     "support_request": "درخواست پشتیبانی",
 }
@@ -422,6 +429,10 @@ def make_sqlserver_engine():
 
 engine = make_sqlserver_engine()
 faq_vector_engine = FAQVectorEngine(engine)
+knowledge_answer_service = KnowledgeAnswerService(
+    retriever=faq_vector_engine,
+    ai=ai_engine,
+)
 
 
 def utc_now() -> datetime:
@@ -693,6 +704,52 @@ def init_db() -> None:
         conn.execute(
             text(
                 """
+                IF OBJECT_ID(N'dbo.knowledge_documents', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE dbo.knowledge_documents (
+                        id INT IDENTITY(1,1) PRIMARY KEY,
+                        title NVARCHAR(300) NOT NULL,
+                        content NVARCHAR(MAX) NOT NULL,
+                        category NVARCHAR(200) NULL DEFAULT N'عمومی',
+                        source_type NVARCHAR(80) NOT NULL DEFAULT N'manual',
+                        source_reference NVARCHAR(1000) NULL,
+                        version NVARCHAR(100) NULL,
+                        is_active BIT NOT NULL DEFAULT 1,
+                        approval_status NVARCHAR(50) NOT NULL DEFAULT N'approved',
+                        created_by INT NULL,
+                        approved_by INT NULL,
+                        created_at NVARCHAR(80) NOT NULL,
+                        updated_at NVARCHAR(80) NOT NULL,
+                        approved_at NVARCHAR(80) NULL
+                    );
+                END
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                IF OBJECT_ID(N'dbo.knowledge_candidates', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE dbo.knowledge_candidates (
+                        id INT IDENTITY(1,1) PRIMARY KEY,
+                        question NVARCHAR(MAX) NOT NULL,
+                        normalized_question NVARCHAR(MAX) NULL,
+                        suggested_answer NVARCHAR(MAX) NULL,
+                        source_type NVARCHAR(80) NOT NULL DEFAULT N'unanswered',
+                        source_reference NVARCHAR(1000) NULL,
+                        status NVARCHAR(50) NOT NULL DEFAULT N'pending',
+                        created_at NVARCHAR(80) NOT NULL,
+                        reviewed_at NVARCHAR(80) NULL,
+                        reviewed_by INT NULL
+                    );
+                END
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
                 IF OBJECT_ID(N'dbo.keyword_groups', N'U') IS NULL
                 BEGIN
                     CREATE TABLE dbo.keyword_groups (
@@ -841,6 +898,11 @@ def json_response(
     matched_questions: Optional[List[str]] = None,
     categories: Optional[List[str]] = None,
     suggestions: Optional[List[str]] = None,
+    sources: Optional[List[Dict[str, Any]]] = None,
+    answered_parts: Optional[List[str]] = None,
+    unanswered_parts: Optional[List[str]] = None,
+    preserve_context: bool = False,
+    awaiting_clarification_detail: bool = False,
     status_code: int = 200,
 ):
     return (
@@ -850,6 +912,11 @@ def json_response(
                 "matched_questions": matched_questions or [],
                 "categories": categories or [],
                 "suggestions": suggestions or [],
+                "sources": sources or [],
+                "answered_parts": answered_parts or [],
+                "unanswered_parts": unanswered_parts or [],
+                "preserve_context": bool(preserve_context),
+                "awaiting_clarification_detail": bool(awaiting_clarification_detail),
             }
         ),
         status_code,
@@ -1930,6 +1997,7 @@ def clarification_response(
     raw_question: str,
     previous_question: str,
     previous_answer: str,
+    was_awaiting_detail: bool = False,
 ):
     try:
         reply = ai_engine.clarify_previous_answer(
@@ -1951,6 +2019,8 @@ def clarification_response(
         answers=[reply],
         matched_questions=[],
         categories=["توضیح ساده‌تر"],
+        preserve_context=True,
+        awaiting_clarification_detail=not was_awaiting_detail,
     )
 
 
@@ -1973,6 +2043,54 @@ def build_fallback_support_answer(raw_question: str, suggestions=None) -> str:
     )
 
 
+def queue_knowledge_candidate(
+    raw_question: str,
+    normalized_question: str,
+    suggested_answer: str = "",
+) -> None:
+    existing = db_fetchone(
+        """
+        SELECT TOP 1 id
+        FROM dbo.knowledge_candidates
+        WHERE status = N'pending'
+          AND normalized_question = :normalized_question
+        ORDER BY id DESC
+        """,
+        {"normalized_question": normalized_question},
+    )
+    if existing:
+        return
+
+    db_execute(
+        """
+        INSERT INTO dbo.knowledge_candidates (
+            question,
+            normalized_question,
+            suggested_answer,
+            source_type,
+            source_reference,
+            status,
+            created_at
+        ) VALUES (
+            :question,
+            :normalized_question,
+            :suggested_answer,
+            N'unanswered',
+            NULL,
+            N'pending',
+            :created_at
+        )
+        """,
+        {
+            "question": raw_question,
+            "normalized_question": normalized_question,
+            "suggested_answer": suggested_answer or None,
+            "created_at": to_iso(utc_now()),
+        },
+    )
+    db_commit()
+
+
 def ticket_fallback_response(raw_question: str, normalized_question: str):
     # ثبت داخلی فقط برای تکمیل پایگاه دانش است و نباید مانع نمایش لینک تیکت شود.
     try:
@@ -1983,6 +2101,13 @@ def ticket_fallback_response(raw_question: str, normalized_question: str):
         )
     except Exception:
         app.logger.exception("Failed to log unanswered question")
+        get_db().rollback()
+
+    try:
+        queue_knowledge_candidate(raw_question, normalized_question)
+    except Exception:
+        app.logger.exception("Failed to queue knowledge candidate")
+        get_db().rollback()
 
     return json_response(
         answers=[build_fallback_support_answer(raw_question)],
@@ -2003,6 +2128,9 @@ def ask():
     previous_answer = str(
         data.get("previous_answer") or ""
     ).strip()[:5000]
+    awaiting_clarification_detail = str(
+        data.get("awaiting_clarification_detail") or ""
+    ).strip().lower() in {"1", "true", "yes"}
 
     if not raw_question:
         return json_response(
@@ -2012,11 +2140,15 @@ def ask():
 
     normalized_question = normalize_text(raw_question)
 
-    if previous_answer and is_clarification_request(raw_question):
+    if previous_answer and (
+        is_clarification_request(raw_question)
+        or awaiting_clarification_detail
+    ):
         return clarification_response(
             raw_question,
             previous_question,
             previous_answer,
+            was_awaiting_detail=awaiting_clarification_detail,
         )
 
     if is_ticket_followup(raw_question):
@@ -2043,16 +2175,17 @@ def ask():
 
         if (
             message_type == "clarification_request"
-            and route_confidence >= 0.70
+            and route_confidence >= 0.65
             and previous_answer
         ):
             return clarification_response(
                 raw_question,
                 previous_question,
                 previous_answer,
+                was_awaiting_detail=False,
             )
 
-        if message_type == "smalltalk" and route_confidence >= 0.85:
+        if message_type == "smalltalk" and route_confidence >= 0.70:
             try:
                 reply = ai_engine.generate_smalltalk_reply(
                     raw_question
@@ -2064,6 +2197,7 @@ def ask():
                     answers=[reply],
                     matched_questions=[],
                     categories=["گفت‌وگوی عمومی"],
+                    preserve_context=bool(previous_answer),
                 )
 
             except Exception as e:
@@ -2075,17 +2209,29 @@ def ask():
                     ],
                     matched_questions=[],
                     categories=["گفت‌وگوی عمومی"],
+                    preserve_context=bool(previous_answer),
                 )
 
-        if message_type == "unclear" and route_confidence >= 0.60:
+        if message_type == "unclear" and route_confidence >= 0.50:
             return json_response(
                 answers=[
                     "متوجه نشدم دقیقاً کدام بخش برای شما درست کار نمی‌کند. "
-                    "لطفاً بفرمایید در کدام قسمت نرم‌افزار هستید و چه کاری انجام نمی‌شود.\n\n"
-                    + build_human_support_answer(raw_question)
+                    "لطفاً نام ماژول، کاری که انجام می‌دهید و متن خطا را بنویسید."
                 ],
                 matched_questions=[],
                 categories=["نیازمند توضیح بیشتر"],
+                preserve_context=bool(previous_answer),
+            )
+
+        if message_type == "out_of_scope" and route_confidence >= 0.65:
+            return json_response(
+                answers=[
+                    "من برای پاسخ‌گویی درباره نرم‌افزار و خدمات مدریک طراحی شده‌ام. "
+                    "اگر سؤال شما مربوط به مدریک است، نام ماژول و موضوع را بنویسید."
+                ],
+                matched_questions=[],
+                categories=["خارج از حوزه پشتیبانی"],
+                preserve_context=bool(previous_answer),
             )
 
     except Exception as e:
@@ -2100,7 +2246,7 @@ def ask():
 
     print("MESSAGE INTENT:", message_intent)
     if message_intent == "support" or (
-        message_type == "support_request" and route_confidence >= 0.85
+        message_type == "support_request" and route_confidence >= 0.70
     ):
         support_answer = build_human_support_answer(
             raw_question
@@ -2124,81 +2270,42 @@ def ask():
             categories=["عمومی"],
         )
 
-    # AI + Vector + Judge
-    # اگر هر بخش AI خطا کند، چت‌بات خراب نمی‌شود
-    # و مسیر قدیمی FAQ/Fallback ادامه پیدا می‌کند.
-    vector_search_completed = False
     try:
-        vector_result = faq_vector_engine.find_best_match(
-            raw_question
-        )
-
-        best_match = vector_result.get("best")
-        vector_search_completed = True
-
-        if best_match:
-            item = best_match["item"]
-
-            judge_confidence = vector_result.get(
-                "judge_confidence",
-                0.0
-            )
-
-            if judge_confidence >= 0.80:
-                return json_response(
-                    answers=[item["answer"]],
-                    matched_questions=[
-                        item["question"]
-                    ],
-                    categories=[
-                        item.get("category", "عمومی")
-                    ],
-                )
-
-    except Exception as e:
-        print(
-            "AI VECTOR ERROR:",
-            repr(e)
-        )
-
-    # رد پاسخ توسط Judge نباید با پاسخ مشابه از مسیر قدیمی دور زده شود.
-    if vector_search_completed:
-        return ticket_fallback_response(raw_question, normalized_question)
-
-    # در دسترس نبودن AI: تنها در صورت یافتن پاسخ در مسیر محلی پاسخ می‌دهیم.
-    try:
-        best_matches = search_best_answers(normalized_question)
-        smart_answer = build_smart_answer(raw_question, best_matches) if best_matches else ""
+        knowledge_result = knowledge_answer_service.answer(raw_question)
     except Exception:
-        app.logger.exception("Local FAQ search failed")
+        app.logger.exception("Grounded knowledge answer failed")
+        knowledge_result = None
+
+    if not knowledge_result:
         return ticket_fallback_response(raw_question, normalized_question)
 
-    if not smart_answer:
-        return ticket_fallback_response(raw_question, normalized_question)
+    answer_text = knowledge_result["answer"]
+    unanswered_parts = knowledge_result.get("unanswered_parts") or []
 
-    matched_questions = []
-    categories = []
-    seen_questions = set()
-    seen_categories = set()
-
-    for match in best_matches:
-        qa_item = match.get("item", {})
-
-        question = str(qa_item.get("question", raw_question)).strip()
-        category = str(qa_item.get("category", "عمومی")).strip() or "عمومی"
-
-        if question and question not in seen_questions:
-            matched_questions.append(question)
-            seen_questions.add(question)
-
-        if category and category not in seen_categories:
-            categories.append(category)
-            seen_categories.add(category)
+    if unanswered_parts:
+        missing_text = "\n".join(f"• {item}" for item in unanswered_parts)
+        answer_text += (
+            "\n\nبرای بخش‌های زیر پاسخ تأییدشده‌ای پیدا نکردم:\n"
+            f"{missing_text}\n\n"
+            + build_human_support_answer(raw_question)
+        )
+        for missing_part in unanswered_parts:
+            try:
+                queue_knowledge_candidate(
+                    missing_part,
+                    normalize_text(missing_part),
+                )
+            except Exception:
+                app.logger.exception("Failed to queue partial knowledge gap")
+                get_db().rollback()
 
     return json_response(
-        answers=[smart_answer],
-        matched_questions=matched_questions,
-        categories=categories,
+        answers=[answer_text],
+        matched_questions=knowledge_result.get("matched_questions"),
+        categories=[knowledge_result.get("category") or "پایگاه دانش"],
+        sources=knowledge_result.get("sources"),
+        answered_parts=knowledge_result.get("answered_parts"),
+        unanswered_parts=unanswered_parts,
     )
 @app.errorhandler(500)
 def handle_server_error(error):
@@ -2411,6 +2518,7 @@ def admin_faq():
             )
 
         db_commit()
+        faq_vector_engine.invalidate_cache()
 
         record_activity(
             action="faq_created",
@@ -2503,6 +2611,7 @@ def edit_faq(faq_id):
     )
 
     db_commit()
+    faq_vector_engine.invalidate_cache()
 
     record_activity(
         action="faq_updated",
@@ -2549,6 +2658,7 @@ def toggle_faq(faq_id):
     )
 
     db_commit()
+    faq_vector_engine.invalidate_cache()
 
     record_activity(
         action="faq_toggled",
@@ -2559,6 +2669,290 @@ def toggle_faq(faq_id):
 
     flash("وضعیت پاسخ پایگاه دانش تغییر کرد.", "success")
     return redirect(url_for("admin_faq"))
+
+
+@app.route("/admin/knowledge", methods=["GET", "POST"])
+@support_manager_required_page
+def admin_knowledge():
+    if request.method == "POST":
+        title = str(request.form.get("title", "")).strip()
+        content = str(request.form.get("content", "")).strip()
+        category = str(request.form.get("category", "عمومی")).strip() or "عمومی"
+        source_type = str(request.form.get("source_type", "manual")).strip()
+        source_reference = str(request.form.get("source_reference", "")).strip()
+        version = str(request.form.get("version", "")).strip()
+        allowed_types = {"manual", "guide", "release_note", "policy"}
+        if source_type not in allowed_types:
+            source_type = "manual"
+        if not title or not content:
+            flash("عنوان و متن سند آموزشی الزامی است.", "error")
+            return redirect(url_for("admin_knowledge"))
+
+        now = to_iso(utc_now())
+        result = db_execute(
+            """
+            INSERT INTO dbo.knowledge_documents (
+                title,
+                content,
+                category,
+                source_type,
+                source_reference,
+                version,
+                is_active,
+                approval_status,
+                created_by,
+                approved_by,
+                created_at,
+                updated_at,
+                approved_at
+            )
+            OUTPUT INSERTED.id
+            VALUES (
+                :title,
+                :content,
+                :category,
+                :source_type,
+                :source_reference,
+                :version,
+                1,
+                N'approved',
+                :user_id,
+                :user_id,
+                :created_at,
+                :updated_at,
+                :approved_at
+            )
+            """,
+            {
+                "title": title,
+                "content": content,
+                "category": category,
+                "source_type": source_type,
+                "source_reference": source_reference or None,
+                "version": version or None,
+                "user_id": int(session.get("user_id")) if session.get("user_id") else None,
+                "created_at": now,
+                "updated_at": now,
+                "approved_at": now,
+            },
+        )
+        document_id = int(result.scalar() or 0)
+        db_commit()
+        faq_vector_engine.invalidate_cache()
+        record_activity(
+            action="knowledge_document_created",
+            entity_type="knowledge_document",
+            entity_id=document_id,
+            details=f"title={title[:120]}",
+        )
+        flash("سند آموزشی تأیید و به منابع پاسخ‌گویی اضافه شد.", "success")
+        return redirect(url_for("admin_knowledge"))
+
+    documents = db_fetchall(
+        """
+        SELECT TOP 300
+            id, title, content, category, source_type, source_reference,
+            version, is_active, approval_status, updated_at
+        FROM dbo.knowledge_documents
+        ORDER BY is_active DESC, id DESC
+        """
+    )
+    candidates = db_fetchall(
+        """
+        SELECT TOP 200
+            id, question, normalized_question, suggested_answer,
+            source_type, status, created_at
+        FROM dbo.knowledge_candidates
+        WHERE status = N'pending'
+        ORDER BY id DESC
+        """
+    )
+    return render_template(
+        "admin_knowledge.html",
+        documents=documents,
+        candidates=candidates,
+    )
+
+
+@app.route("/admin/knowledge/<int:document_id>/edit", methods=["POST"])
+@support_manager_required_page
+def edit_knowledge_document(document_id):
+    title = str(request.form.get("title", "")).strip()
+    content = str(request.form.get("content", "")).strip()
+    category = str(request.form.get("category", "عمومی")).strip() or "عمومی"
+    source_type = str(request.form.get("source_type", "manual")).strip()
+    source_reference = str(request.form.get("source_reference", "")).strip()
+    version = str(request.form.get("version", "")).strip()
+    if source_type not in {"manual", "guide", "release_note", "policy", "unanswered_review"}:
+        source_type = "manual"
+    if not title or not content:
+        flash("عنوان و متن سند آموزشی الزامی است.", "error")
+        return redirect(url_for("admin_knowledge"))
+
+    db_execute(
+        """
+        UPDATE dbo.knowledge_documents
+        SET
+            title = :title,
+            content = :content,
+            category = :category,
+            source_type = :source_type,
+            source_reference = :source_reference,
+            version = :version,
+            updated_at = :updated_at
+        WHERE id = :id
+        """,
+        {
+            "title": title,
+            "content": content,
+            "category": category,
+            "source_type": source_type,
+            "source_reference": source_reference or None,
+            "version": version or None,
+            "updated_at": to_iso(utc_now()),
+            "id": document_id,
+        },
+    )
+    db_commit()
+    faq_vector_engine.invalidate_cache()
+    record_activity(
+        action="knowledge_document_updated",
+        entity_type="knowledge_document",
+        entity_id=document_id,
+        details=f"title={title[:120]}",
+    )
+    flash("سند آموزشی ویرایش شد.", "success")
+    return redirect(url_for("admin_knowledge"))
+
+
+@app.route("/admin/knowledge/<int:document_id>/toggle", methods=["POST"])
+@support_manager_required_page
+def toggle_knowledge_document(document_id):
+    row = db_fetchone(
+        "SELECT TOP 1 is_active FROM dbo.knowledge_documents WHERE id = :id",
+        {"id": document_id},
+    )
+    if not row:
+        flash("سند آموزشی پیدا نشد.", "error")
+        return redirect(url_for("admin_knowledge"))
+    new_status = 0 if int(row["is_active"] or 0) == 1 else 1
+    db_execute(
+        """
+        UPDATE dbo.knowledge_documents
+        SET is_active = :is_active, updated_at = :updated_at
+        WHERE id = :id
+        """,
+        {
+            "is_active": new_status,
+            "updated_at": to_iso(utc_now()),
+            "id": document_id,
+        },
+    )
+    db_commit()
+    faq_vector_engine.invalidate_cache()
+    record_activity(
+        action="knowledge_document_toggled",
+        entity_type="knowledge_document",
+        entity_id=document_id,
+        details=f"is_active={new_status}",
+    )
+    flash("وضعیت سند آموزشی تغییر کرد.", "success")
+    return redirect(url_for("admin_knowledge"))
+
+
+@app.route("/admin/knowledge-candidates/<int:candidate_id>/approve", methods=["POST"])
+@support_manager_required_page
+def approve_knowledge_candidate(candidate_id):
+    candidate = db_fetchone(
+        """
+        SELECT TOP 1 *
+        FROM dbo.knowledge_candidates
+        WHERE id = :id AND status = N'pending'
+        """,
+        {"id": candidate_id},
+    )
+    if not candidate:
+        flash("پیشنهاد آموزشی پیدا نشد یا قبلاً بررسی شده است.", "error")
+        return redirect(url_for("admin_knowledge"))
+
+    title = str(request.form.get("title") or candidate["question"] or "").strip()
+    content = str(
+        request.form.get("content") or candidate["suggested_answer"] or ""
+    ).strip()
+    category = str(request.form.get("category", "عمومی")).strip() or "عمومی"
+    if not title or not content:
+        flash("برای تأیید، عنوان و پاسخ تأییدشده را وارد کنید.", "error")
+        return redirect(url_for("admin_knowledge"))
+
+    now = to_iso(utc_now())
+    result = db_execute(
+        """
+        INSERT INTO dbo.knowledge_documents (
+            title, content, category, source_type, source_reference, version,
+            is_active, approval_status, created_by, approved_by,
+            created_at, updated_at, approved_at
+        )
+        OUTPUT INSERTED.id
+        VALUES (
+            :title, :content, :category, N'unanswered_review',
+            :source_reference, NULL, 1, N'approved',
+            :user_id, :user_id, :created_at, :updated_at, :approved_at
+        )
+        """,
+        {
+            "title": title,
+            "content": content,
+            "category": category,
+            "source_reference": f"candidate:{candidate_id}",
+            "user_id": int(session.get("user_id")) if session.get("user_id") else None,
+            "created_at": now,
+            "updated_at": now,
+            "approved_at": now,
+        },
+    )
+    document_id = int(result.scalar() or 0)
+    db_execute(
+        """
+        UPDATE dbo.knowledge_candidates
+        SET status = N'approved', reviewed_at = :reviewed_at, reviewed_by = :reviewed_by
+        WHERE id = :id
+        """,
+        {
+            "reviewed_at": now,
+            "reviewed_by": int(session.get("user_id")) if session.get("user_id") else None,
+            "id": candidate_id,
+        },
+    )
+    db_commit()
+    faq_vector_engine.invalidate_cache()
+    record_activity(
+        action="knowledge_candidate_approved",
+        entity_type="knowledge_candidate",
+        entity_id=candidate_id,
+        details=f"document_id={document_id}",
+    )
+    flash("پاسخ تأیید شد و از این پس در پاسخ‌گویی قابل استفاده است.", "success")
+    return redirect(url_for("admin_knowledge"))
+
+
+@app.route("/admin/knowledge-candidates/<int:candidate_id>/reject", methods=["POST"])
+@support_manager_required_page
+def reject_knowledge_candidate(candidate_id):
+    db_execute(
+        """
+        UPDATE dbo.knowledge_candidates
+        SET status = N'rejected', reviewed_at = :reviewed_at, reviewed_by = :reviewed_by
+        WHERE id = :id AND status = N'pending'
+        """,
+        {
+            "reviewed_at": to_iso(utc_now()),
+            "reviewed_by": int(session.get("user_id")) if session.get("user_id") else None,
+            "id": candidate_id,
+        },
+    )
+    db_commit()
+    flash("پیشنهاد از صف آموزش حذف شد.", "success")
+    return redirect(url_for("admin_knowledge"))
 
 
 @app.route("/admin/users", methods=["GET", "POST"])

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>آموزش دستیار مدریک</title>
+  <style>
+    :root{
+      --bg:#090b10; --card:#121720; --card2:#171d27;
+      --border:rgba(255,255,255,.09); --text:#f4f6fa;
+      --muted:#a2a9b7; --orange:#ff7a00; --orange2:#ff9a3d;
+      --green:#21c66a; --red:#ff6969;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; padding:22px;
+      background:radial-gradient(circle at 12% 8%,rgba(255,122,0,.11),transparent 20%),var(--bg);
+      color:var(--text); font-family:Tahoma,Arial,sans-serif;
+    }
+    .page{max-width:1280px;margin:auto}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+    h1{font-size:25px;margin:0 0 7px}
+    h2{font-size:17px;margin:0 0 14px}
+    p{line-height:1.9}.subtitle,.hint{color:var(--muted);font-size:12px;margin:0}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    a,.btn{
+      border:0;border-radius:10px;padding:9px 13px;min-height:36px;
+      display:inline-flex;align-items:center;justify-content:center;
+      color:#fff;text-decoration:none;font:800 12px Tahoma,Arial,sans-serif;cursor:pointer;
+    }
+    .primary{background:linear-gradient(135deg,var(--orange),var(--orange2))}
+    .secondary{background:rgba(255,255,255,.07);border:1px solid var(--border)}
+    .danger{background:rgba(255,105,105,.12);border:1px solid rgba(255,105,105,.26);color:#ffd1d1}
+    .section{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:17px;margin-bottom:18px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+    label{font-size:12px;color:var(--muted);font-weight:800}
+    input,textarea,select{
+      width:100%;border:1px solid rgba(255,255,255,.12);border-radius:10px;
+      background:#0e131b;color:var(--text);padding:10px;font:12px/1.9 Tahoma,Arial,sans-serif;outline:none;
+    }
+    textarea{min-height:130px;resize:vertical}
+    input:focus,textarea:focus,select:focus{border-color:rgba(255,122,0,.6)}
+    .flash{padding:11px 13px;margin-bottom:10px;border-radius:11px;font-size:12px;background:rgba(255,255,255,.06)}
+    .flash.success{color:#bfffd3;border:1px solid rgba(33,198,106,.25)}
+    .flash.error{color:#ffd1d1;border:1px solid rgba(255,105,105,.25)}
+    .candidate-grid,.document-grid{display:grid;gap:12px}
+    .candidate,.document{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .candidate-head,.document-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+    .candidate h3,.document h3{font-size:14px;line-height:1.8;margin:0}
+    .badge{white-space:nowrap;border-radius:999px;padding:5px 9px;font-size:10px;background:rgba(255,122,0,.12);color:#ffc185}
+    .badge.off{background:rgba(255,105,105,.12);color:#ffc2c2}
+    .candidate-actions,.document-actions{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+    .candidate-actions form,.document-actions form{margin:0}
+    .empty{color:var(--muted);font-size:12px;text-align:center;padding:22px}
+    .document-content{white-space:pre-wrap;color:#d6dae2;font-size:12px;line-height:1.9;max-height:120px;overflow:auto}
+    .meta{color:var(--muted);font-size:11px;margin-top:8px}
+    details{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+    summary{cursor:pointer;color:#ffc185;font-size:11px;font-weight:800}
+    @media(max-width:760px){
+      body{padding:12px}.topbar{display:grid}.form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}.candidate-head,.document-head{display:grid}
+    }
+  </style>
+  {% include "_theme_support.html" %}
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>آموزش دستیار مدریک</h1>
+        <p class="subtitle">راهنماهای تأییدشده را اضافه کنید و سؤال‌های بی‌پاسخ را پس از بررسی به دانش دستیار تبدیل کنید.</p>
+      </div>
+      <nav class="actions">
+        <a class="secondary" href="{{ url_for('admin_faq') }}">FAQها</a>
+        <a class="primary" href="{{ url_for('home') }}">بازگشت به چت</a>
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <section class="section">
+      <h2>افزودن سند آموزشی تأییدشده</h2>
+      <form method="post">
+        <div class="form-grid">
+          <div class="field">
+            <label for="title">عنوان موضوع</label>
+            <input id="title" name="title" required placeholder="مثلاً: ثبت سند حسابداری پس از تأیید">
+          </div>
+          <div class="field">
+            <label for="category">ماژول یا دسته</label>
+            <input id="category" name="category" value="عمومی" placeholder="حسابداری، فروش، انبار...">
+          </div>
+          <div class="field">
+            <label for="source_type">نوع منبع</label>
+            <select id="source_type" name="source_type">
+              <option value="manual">آموزش داخلی</option>
+              <option value="guide">راهنمای محصول</option>
+              <option value="release_note">یادداشت نسخه</option>
+              <option value="policy">رویه پشتیبانی</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="version">نسخه مرتبط</label>
+            <input id="version" name="version" placeholder="اختیاری">
+          </div>
+          <div class="field full">
+            <label for="source_reference">آدرس یا مرجع منبع</label>
+            <input id="source_reference" name="source_reference" placeholder="اختیاری؛ لینک راهنما یا نام سند داخلی">
+          </div>
+          <div class="field full">
+            <label for="content">متن تأییدشده</label>
+            <textarea id="content" name="content" required placeholder="اطلاعات دقیق، مراحل و محدودیت‌های تأییدشده را بنویسید."></textarea>
+          </div>
+        </div>
+        <div class="candidate-actions">
+          <button class="btn primary" type="submit">ثبت و فعال‌سازی منبع</button>
+          <span class="hint">دستیار فقط از منابع فعال و تأییدشده پاسخ می‌سازد.</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>صف بررسی سؤال‌های بی‌پاسخ</h2>
+      <div class="candidate-grid">
+        {% for item in candidates %}
+          <article class="candidate">
+            <div class="candidate-head">
+              <h3>{{ item.question }}</h3>
+              <span class="badge">نیازمند بررسی</span>
+            </div>
+            <form method="post" action="{{ url_for('approve_knowledge_candidate', candidate_id=item.id) }}">
+              <div class="form-grid">
+                <div class="field">
+                  <label>عنوان نهایی</label>
+                  <input name="title" value="{{ item.question }}" required>
+                </div>
+                <div class="field">
+                  <label>دسته</label>
+                  <input name="category" value="عمومی">
+                </div>
+                <div class="field full">
+                  <label>پاسخ تأییدشده کارشناس</label>
+                  <textarea name="content" required>{{ item.suggested_answer or '' }}</textarea>
+                </div>
+              </div>
+              <div class="candidate-actions">
+                <button class="btn primary" type="submit">تأیید و آموزش</button>
+              </div>
+            </form>
+            <div class="candidate-actions">
+              <form method="post" action="{{ url_for('reject_knowledge_candidate', candidate_id=item.id) }}">
+                <button class="btn danger" type="submit">رد کردن پیشنهاد</button>
+              </form>
+              <span class="meta">ثبت‌شده در {{ item.created_at }}</span>
+            </div>
+          </article>
+        {% else %}
+          <div class="empty">در حال حاضر سؤال بی‌پاسخی در صف آموزش نیست.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>منابع آموزشی</h2>
+      <div class="document-grid">
+        {% for item in documents %}
+          <article class="document">
+            <div class="document-head">
+              <div>
+                <h3>{{ item.title }}</h3>
+                <div class="meta">{{ item.category or 'عمومی' }} · {{ item.source_type }}{% if item.version %} · نسخه {{ item.version }}{% endif %}</div>
+              </div>
+              <span class="badge {% if not item.is_active %}off{% endif %}">
+                {{ 'فعال' if item.is_active else 'غیرفعال' }}
+              </span>
+            </div>
+            <div class="document-content">{{ item.content }}</div>
+            <div class="document-actions">
+              <form method="post" action="{{ url_for('toggle_knowledge_document', document_id=item.id) }}">
+                <button class="btn secondary" type="submit">
+                  {{ 'غیرفعال کردن' if item.is_active else 'فعال کردن' }}
+                </button>
+              </form>
+              {% if item.source_reference %}
+                <span class="meta">مرجع: {{ item.source_reference }}</span>
+              {% endif %}
+            </div>
+            <details>
+              <summary>ویرایش این منبع</summary>
+              <form method="post" action="{{ url_for('edit_knowledge_document', document_id=item.id) }}">
+                <div class="form-grid" style="margin-top:12px">
+                  <div class="field">
+                    <label>عنوان</label>
+                    <input name="title" value="{{ item.title }}" required>
+                  </div>
+                  <div class="field">
+                    <label>دسته</label>
+                    <input name="category" value="{{ item.category or 'عمومی' }}">
+                  </div>
+                  <div class="field">
+                    <label>نوع منبع</label>
+                    <select name="source_type">
+                      {% for value, label in [('manual','آموزش داخلی'),('guide','راهنمای محصول'),('release_note','یادداشت نسخه'),('policy','رویه پشتیبانی'),('unanswered_review','پاسخ بررسی‌شده')] %}
+                        <option value="{{ value }}" {% if item.source_type == value %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>نسخه</label>
+                    <input name="version" value="{{ item.version or '' }}">
+                  </div>
+                  <div class="field full">
+                    <label>مرجع</label>
+                    <input name="source_reference" value="{{ item.source_reference or '' }}">
+                  </div>
+                  <div class="field full">
+                    <label>متن تأییدشده</label>
+                    <textarea name="content" required>{{ item.content }}</textarea>
+                  </div>
+                </div>
+                <div class="document-actions">
+                  <button class="btn primary" type="submit">ذخیره ویرایش</button>
+                </div>
+              </form>
+            </details>
+          </article>
+        {% else %}
+          <div class="empty">هنوز سند آموزشی ثبت نشده است؛ FAQهای فعلی همچنان قابل استفاده‌اند.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

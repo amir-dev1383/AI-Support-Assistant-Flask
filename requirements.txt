@@ -5,8 +5,13 @@ importlib_metadata==8.7.1
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
+numpy==2.5.2
+openai==3.8.0
+pyodbc==5.3.0
 python-dotenv==1.2.1
 RapidFuzz==3.13.0
+scikit-learn==1.9.0
+sentence-transformers==6.0.1
 SQLAlchemy==2.0.52
 typing_extensions==4.16.0
 Werkzeug==3.1.8
