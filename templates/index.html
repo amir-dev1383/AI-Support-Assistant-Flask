@@ -685,19 +685,6 @@ html.light-mode body .question-chip:hover{
       border-color:rgba(20,130,66,0.22);
     }
 
-    .source-box{
-      margin:8px 0 0;
-      padding:10px 12px;
-      border:1px solid rgba(255,122,0,0.18);
-      border-radius:12px;
-      background:rgba(255,122,0,0.055);
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.9;
-    }
-
-    .source-title{font-weight:900;color:var(--text);margin-bottom:4px}
-    .source-item{display:block}
 
 body.light-mode .questions-panel,
 body.light-mode .groups-panel,
@@ -1580,35 +1567,6 @@ function linkifyText(text){
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
-      function addSourceBox(sources) {
-        if (!Array.isArray(sources) || sources.length === 0) return;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "message bot";
-        const box = document.createElement("div");
-        box.className = "source-box";
-
-        const title = document.createElement("div");
-        title.className = "source-title";
-        title.textContent = "منابع استفاده‌شده:";
-        box.appendChild(title);
-
-        sources.forEach(function (source) {
-          const item = document.createElement("span");
-          item.className = "source-item";
-          const sourceTitle = String(source?.title || "منبع دانش").trim();
-          const category = String(source?.category || "").trim();
-          const version = String(source?.version || "").trim();
-          item.textContent = "• " + sourceTitle
-            + (category ? " — " + category : "")
-            + (version ? " — نسخه " + version : "");
-          box.appendChild(item);
-        });
-
-        wrapper.appendChild(box);
-        chatMessages.appendChild(wrapper);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
 
       async function sendFeedback({ question, answer, category, rating, buttons = [], savedText = null, reason = "", comment = "" }) {
         buttons.forEach(btn => btn.disabled = true);
@@ -1934,10 +1892,6 @@ function renderTopicQuestions(groupKey, topicIndex) {
 
           if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
             addSuggestionBox(data.suggestions);
-          }
-
-          if (Array.isArray(data.sources) && data.sources.length > 0) {
-            addSourceBox(data.sources);
           }
 
         } catch (error) {
